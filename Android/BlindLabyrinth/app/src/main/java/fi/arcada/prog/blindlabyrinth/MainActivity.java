@@ -1,9 +1,12 @@
 package fi.arcada.prog.blindlabyrinth;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 
 public class MainActivity extends Activity {
@@ -12,6 +15,16 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Bind controls to needed actions here, button example -LL
+        ((Button) findViewById(R.id.button)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startGame();
+            }
+        });
+
+
     }
 
 
@@ -35,5 +48,16 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    // Method for switching to the GameActivity -LL
+    public void startGame() {
+        Intent i = new Intent(getApplicationContext(), GameActivity.class);
+
+        // Optional parameters might be needed, mode/difficulty etc.
+        // Use the following format to pass needed data:
+        // i.putExtra("key", "value");
+
+        startActivity(i);
     }
 }
