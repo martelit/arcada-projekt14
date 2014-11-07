@@ -23,6 +23,12 @@ public class MainActivity extends Activity {
                 startGame();
             }
         });
+        ((Button) findViewById(R.id.btnaccel)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startAccelerometer ();
+            }
+        });
 
 
     }
@@ -59,5 +65,9 @@ public class MainActivity extends Activity {
         // i.putExtra("key", "value");
 
         startActivity(i);
+    }
+    public void startAccelerometer() {
+        Intent intent = new Intent(getApplicationContext(), Accelerometer.class);
+        startActivity(intent);
     }
 }
