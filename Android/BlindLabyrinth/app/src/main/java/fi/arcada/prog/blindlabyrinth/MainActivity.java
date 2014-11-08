@@ -29,7 +29,12 @@ public class MainActivity extends Activity {
                 startAccelerometer ();
             }
         });
-
+        ((Button) findViewById(R.id.btnGameViewBlank)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startGameViewBlank();
+            }
+        });
 
     }
 
@@ -68,6 +73,10 @@ public class MainActivity extends Activity {
     }
     public void startAccelerometer() {
         Intent intent = new Intent(getApplicationContext(), Accelerometer.class);
+        startActivity(intent);
+    }
+    public void startGameViewBlank() {
+        Intent intent = new Intent(getApplicationContext(), GameViewBlank.class);
         startActivity(intent);
     }
 }
