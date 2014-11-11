@@ -133,6 +133,7 @@ public class SplashActivity extends Activity {
             public void run() {
                 Intent i = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(i);
+                finish();
             }
 
         }, 2000L);
