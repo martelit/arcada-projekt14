@@ -5,13 +5,24 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.util.Log;
 import android.view.View;
 
 /**
  * Created by rusty on 8.11.2014.
  */
 
-public class GameView extends View implements Runnable {
+public class GameView extends View implements Runnable, SensorEventListener {
+
+    //For holding accelerometer values in x, y and z axis.
+    //Z can be ignored unless someone wanted to do the project in 3d and use all dimensions.
+    float acceleratorX = 0;
+    float acceleratorY = 0;
+    float acceleratorZ = 0;
 
     public Bitmap ballBitmap;
     public Ball ball;
@@ -20,14 +31,32 @@ public class GameView extends View implements Runnable {
     //Free to be changed later on.
     public int ballXStartPosition = 20, ballYStartPosition = 20;
     public int ballWidth = 50, ballHeight = 50;
-    public int ballXStartSpeed = 4, ballYStartSpeed = 6;
+    public int ballXStartSpeed = 0, ballYStartSpeed = 0;
+
+    private SensorManager sensorManager;
 
     public GameView(Context context) {
         super(context);
 
-        //images used for background and bitmaps are stored in app/src/main/java/res/drawable-hdpi
+        //images used for background and bitmaps are stored in app/src/main/java/res/drawable
         //this.setBackgroundResource(R.drawable.nameOfChosenLabyrinthBackgroundForGameScreen);
         ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
+
+        //This line has been somewhat changed so it can be used in GameView (context added before a few things).
+        sensorManager=(SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
+        // add listener. The listener will be HelloAndroid (this) class
+        sensorManager.registerListener(this,
+                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_GAME);
+
+		/*	More sensor speeds (taken from api docs)
+		    SENSOR_DELAY_FASTEST get sensor data as fast as possible
+		    SENSOR_DELAY_GAME	rate suitable for games
+		 	SENSOR_DELAY_NORMAL	rate (default) suitable for screen orientation changes
+		*/
+
+        Log.v("acceleratorX", "" + acceleratorX);
+        Log.v("acceleratorY", ""+acceleratorY);
 
         startGame();
     }
@@ -66,7 +95,25 @@ public class GameView extends View implements Runnable {
     //In other words code for what happens every counted frame during a game.
     protected void onDraw(Canvas canvas)
     {
-        ball.move();
+        ball.move(acceleratorX, acceleratorY);
         canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
     }
+
+    public void onAccuracyChanged(Sensor sensor,int accuracy){
+
+    }
+
+    public void onSensorChanged(SensorEvent event){
+
+        // check sensor type
+        if(event.sensor.getType()==Sensor.TYPE_ACCELEROMETER){
+
+            // assign directions
+            acceleratorX=event.values[0];
+            acceleratorY=event.values[1];
+            acceleratorZ=event.values[2];
+        }
+    }
+
+
 }

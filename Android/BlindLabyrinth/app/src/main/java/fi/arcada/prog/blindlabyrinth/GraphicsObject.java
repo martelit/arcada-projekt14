@@ -3,6 +3,8 @@ package fi.arcada.prog.blindlabyrinth;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
+import java.util.ArrayList;
+
 /**
  * Created by rusty on 8.11.2014.
  */
@@ -17,6 +19,14 @@ public class GraphicsObject {
     protected int xSpeed, ySpeed;
 
     protected RectF size;
+
+    protected double timeStamp;
+    protected double accelerationX, accelerationY;
+    protected double xSpeedDoubleVersion, ySpeedDoubleVersion;
+    protected double xSpeedDoubleVersionTempOldValue, ySpeedDoubleVersionTempOldValue;
+    protected double xDistanceImaginary, yDistanceImaginary;
+
+    protected ArrayList<Double> speedAndLeftoverDecimal;
 
     //Constructor designed for usage when an object of Ball is created.
     //Initializes values.
@@ -34,6 +44,12 @@ public class GraphicsObject {
         //Creates a rectangle from the given data, serving as the location data of the ball + how big it is.
         size = new RectF();
         size.set(xPosition, yPosition, xPosition+width, yPosition+height);
+
+        xSpeedDoubleVersion = (double) xSpeed;
+        ySpeedDoubleVersion = (double) ySpeed;
+
+        xDistanceImaginary = 0;
+        yDistanceImaginary = 0;
     }
 
     //Call this if you need the positional data/size for a rectangle formed object.
