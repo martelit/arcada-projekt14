@@ -111,9 +111,9 @@ public class GameView extends View implements Runnable, SensorEventListener {
         } else {
             PointF d = ctrl.getDirection();
             ball.move(d.x * 10, d.y * 10);
+            ctrl.draw(canvas);
         }
         canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
-        ctrl.draw(canvas);
     }
 
     @Override
