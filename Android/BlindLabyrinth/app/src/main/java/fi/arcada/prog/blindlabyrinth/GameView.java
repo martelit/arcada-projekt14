@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.PointF;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -12,6 +13,7 @@ import android.hardware.SensorManager;
 import android.util.Log;
 import android.view.View;
 
+import android.view.MotionEvent;
 /**
  * Created by rusty on 8.11.2014.
  */
@@ -24,8 +26,11 @@ public class GameView extends View implements Runnable, SensorEventListener {
     float acceleratorY = 0;
     float acceleratorZ = 0;
 
+    boolean DEBUG_CONTROLS = true;
+
     public Bitmap ballBitmap;
     public Ball ball;
+    public Controller ctrl;
 
     //Default values given to a created ball.
     //Free to be changed later on.
@@ -57,6 +62,12 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
         Log.v("acceleratorX", "" + acceleratorX);
         Log.v("acceleratorY", ""+acceleratorY);
+
+
+        ctrl = new Controller(  BitmapFactory.decodeResource(context.getResources(), R.drawable.up),
+                                BitmapFactory.decodeResource(context.getResources(), R.drawable.right),
+                                BitmapFactory.decodeResource(context.getResources(), R.drawable.down),
+                                BitmapFactory.decodeResource(context.getResources(), R.drawable.left));
 
         startGame();
     }
@@ -95,8 +106,31 @@ public class GameView extends View implements Runnable, SensorEventListener {
     //In other words code for what happens every counted frame during a game.
     protected void onDraw(Canvas canvas)
     {
-        ball.move(acceleratorX, acceleratorY);
+        if(!DEBUG_CONTROLS) {
+            ball.move(acceleratorX, acceleratorY);
+        } else {
+            PointF d = ctrl.getDirection();
+            ball.move(d.x * 10, d.y * 10);
+        }
         canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
+        ctrl.draw(canvas);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event)
+    {
+        float x = event.getX();
+        float y = event.getY();
+        switch(event.getAction())
+        {
+            case MotionEvent.ACTION_DOWN:
+                ctrl.updateDirection(x, y);
+                return true;
+            case MotionEvent.ACTION_UP:
+                ctrl.resetDirection();
+                return true;
+        }
+        return false;
     }
 
     public void onAccuracyChanged(Sensor sensor,int accuracy){
