@@ -50,8 +50,13 @@ public class Ball extends GraphicsObject {
         //at least not until something like a timer is connected to it. It can be changed to either increase or decrease the strength of acceleration depending on what feels good to use.
         timeStamp = 0.4;
 
+        //The closer friction is to 1, the more of the ball's movement is preserved each time the position is updated.
+        //Just leave as 1 if we need/want a ball that doesn't slow down on its own.
+        friction = 0.993;
+
         //Acceleration values are taken from the method's in parameters here.
-        accelerationX = (double) acceleratorX;
+        //accelerationX = ((double) acceleratorX)*(-1.0);   //Movement in the x-axis seemed to be reverse of what was needed, so the value is now taken times minus one.
+        accelerationX = (double) acceleratorX;  //Testing on an actual android suggested reversed movement with this line. I don't have a phone myself to test it, but anyone is welcome to confirm this and swap this row with the one above.
         accelerationY = (double) acceleratorY;
 
         //Hardcoded acceleration values can be given here for testing purposes or something...
@@ -63,9 +68,9 @@ public class Ball extends GraphicsObject {
         //v is the current speed (in pixels moved last time, and this time without counting acceleration) and
         //(1/2)at2 is the additional movement caused this time due to the current acceleration a.
         //pow(double a, double b) returns a to the power of b (a^b)
-        xSpeedDoubleVersion = xSpeedDoubleVersion+0.5*accelerationX*Math.pow(timeStamp, 2.0);
+        xSpeedDoubleVersion = xSpeedDoubleVersion*friction+0.5*accelerationX*Math.pow(timeStamp, 2.0);
         //Log.v("xSpeedDoubleVersion", "" + xSpeedDoubleVersion);
-        ySpeedDoubleVersion = ySpeedDoubleVersion+0.5*accelerationY*Math.pow(timeStamp, 2.0);
+        ySpeedDoubleVersion = ySpeedDoubleVersion*friction+0.5*accelerationY*Math.pow(timeStamp, 2.0);
         //Log.v("ySpeedDoubleVersion", ""+ySpeedDoubleVersion);
 
         //The imaginary distances are leftover parts that couldn't be expressed with a whole pixel during the last calculation.

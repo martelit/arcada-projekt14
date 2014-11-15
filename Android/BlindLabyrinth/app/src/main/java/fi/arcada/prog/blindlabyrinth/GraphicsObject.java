@@ -21,6 +21,7 @@ public class GraphicsObject {
     protected RectF size;
 
     protected double timeStamp;
+    protected double friction;
     protected double accelerationX, accelerationY;
     protected double xSpeedDoubleVersion, ySpeedDoubleVersion;
     protected double xSpeedDoubleVersionTempOldValue, ySpeedDoubleVersionTempOldValue;

@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 
 //Activity to draw the contents of GameView with setContentView(new GameView(this)).
 //Probably not necessary or optimal code, but for a beginner like me it was the only solution I knew.
@@ -12,6 +14,11 @@ public class GameViewBlank extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //These two lines are responsible for launching the view in true fullscreen mode.
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(new GameView(this));
     }
 
