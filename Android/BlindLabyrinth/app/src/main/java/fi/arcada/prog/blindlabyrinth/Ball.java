@@ -59,6 +59,15 @@ public class Ball extends GraphicsObject {
         accelerationX = (double) acceleratorX;  //Testing on an actual android suggested reversed movement with this line. I don't have a phone myself to test it, but anyone is welcome to confirm this and swap this row with the one above.
         accelerationY = (double) acceleratorY;
 
+        //Ignores minor acceleration values given by the accelerometer.
+        //The idea is to remove drawn out lingering movement when a phone is for example left on a table.
+        if(accelerationX <= 0.5 && accelerationX >= -0.5){
+            accelerationX = 0;
+        }
+        if(accelerationY <= 0.5 && accelerationY >= -0.5) {
+            accelerationY = 0;
+        }
+
         //Hardcoded acceleration values can be given here for testing purposes or something...
         //accelerationX = 1.0;
         //accelerationY = 8.5;
