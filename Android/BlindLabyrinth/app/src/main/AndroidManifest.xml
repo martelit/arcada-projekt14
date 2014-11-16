@@ -38,6 +38,10 @@
             android:name="fi.arcada.prog.blindlabyrinth.GameViewBlank"
             android:label="@string/title_activity_game_view_blank" >
         </activity>
+        <activity
+            android:name="fi.arcada.prog.blindlabyrinth.Settings"
+            android:label="@string/title_activity_settings" >
+        </activity>
     </application>
 
 </manifest>

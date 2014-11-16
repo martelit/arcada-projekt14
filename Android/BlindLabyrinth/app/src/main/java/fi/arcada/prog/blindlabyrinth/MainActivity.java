@@ -35,6 +35,12 @@ public class MainActivity extends Activity {
                 startGameViewBlank();
             }
         });
+        ((Button) findViewById(R.id.btnSettings)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSettings();
+            }
+        });
 
     }
 
@@ -77,6 +83,10 @@ public class MainActivity extends Activity {
     }
     public void startGameViewBlank() {
         Intent intent = new Intent(getApplicationContext(), GameViewBlank.class);
+        startActivity(intent);
+    }
+    public void startSettings() {
+        Intent intent = new Intent(getApplicationContext(), Settings.class);
         startActivity(intent);
     }
 }

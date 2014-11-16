@@ -35,5 +35,14 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="77dp" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Settings"
+        android:id="@+id/btnSettings"
+        android:layout_below="@+id/btnGameViewBlank"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp" />
+
 
 </RelativeLayout>

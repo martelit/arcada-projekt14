@@ -10,5 +10,6 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="title_activity_accelerometer">Accelerometer</string>
     <string name="title_activity_game_view_blank">GameViewBlank</string>
+    <string name="title_activity_settings">Settings</string>
 
 </resources>
