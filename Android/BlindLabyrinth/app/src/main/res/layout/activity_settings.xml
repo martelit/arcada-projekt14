@@ -80,7 +80,7 @@
             android:id="@+id/large" />
     </RadioGroup>
 
-    <HorizontalScrollView
+    <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="200dp"
         android:layout_alignParentTop="true"
@@ -154,6 +154,6 @@
                 android:id="@+id/ball9" />
         </RadioGroup>
 
-    </HorizontalScrollView>
+    </ScrollView>
 
 </RelativeLayout>
