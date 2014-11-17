@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 
 public class Settings extends Activity {
@@ -19,17 +20,20 @@ public class Settings extends Activity {
         setContentView(R.layout.activity_settings);
 
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, 0);
-        int size = prefs.getInt("size", 2131296273);
-        int gameMode = prefs.getInt("gameMode", 2131296271);
-        int ball = prefs.getInt("ball", 2131296278);
+        String size = prefs.getString("size", "small");
+        String gameMode = prefs.getString("gameMode", "lights_on");
+        String ball = prefs.getString("ball", "ball1");
 
-        RadioButton rb1 = (RadioButton) findViewById(size);
+        int resID = getResources().getIdentifier(size, "id", "fi.arcada.prog.blindlabyrinth");
+        RadioButton rb1 = (RadioButton) findViewById(resID);
         rb1.setChecked(true);
 
-        rb1 = (RadioButton) findViewById(gameMode);
+        resID = getResources().getIdentifier(gameMode, "id", "fi.arcada.prog.blindlabyrinth");
+        rb1 = (RadioButton) findViewById(resID);
         rb1.setChecked(true);
 
-        rb1 = (RadioButton) findViewById(ball);
+        resID = getResources().getIdentifier(ball, "id", "fi.arcada.prog.blindlabyrinth");
+        rb1 = (RadioButton) findViewById(resID);
         rb1.setChecked(true);
 
 
@@ -38,10 +42,15 @@ public class Settings extends Activity {
 
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton rb1 = (RadioButton) findViewById(checkedId);
+                String IdAsString = rb1.getResources().getResourceName(rb1.getId());
+                IdAsString = IdAsString.split("/")[1];
                 SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
-                editor.putInt("gameMode", checkedId);
+                editor.putString("gameMode", IdAsString);
                 editor.commit(); //important, otherwise it wouldn't save.
+                TextView tv1 = (TextView) findViewById(R.id.saveMessage);
+                tv1.setText("Game mode change saved");
             }
         });
 
@@ -51,10 +60,15 @@ public class Settings extends Activity {
 
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton rb1 = (RadioButton) findViewById(checkedId);
+                String IdAsString = rb1.getResources().getResourceName(rb1.getId());
+                IdAsString = IdAsString.split("/")[1];
                 SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
-                editor.putInt("size", checkedId);
+                editor.putString("size", IdAsString);
                 editor.commit(); //important, otherwise it wouldn't save.
+                TextView tv1 = (TextView) findViewById(R.id.saveMessage);
+                tv1.setText("Size change saved");
             }
         });
 
@@ -64,12 +78,15 @@ public class Settings extends Activity {
 
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                // TODO Auto-generated method stub
-                System.out.println(checkedId);
+                RadioButton rb1 = (RadioButton) findViewById(checkedId);
+                String IdAsString = rb1.getResources().getResourceName(rb1.getId());
+                IdAsString = IdAsString.split("/")[1];
                 SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
-                editor.putInt("ball", checkedId);
+                editor.putString("ball", IdAsString);
                 editor.commit(); //important, otherwise it wouldn't save.
+                TextView tv1 = (TextView) findViewById(R.id.saveMessage);
+                tv1.setText("Ball change saved");
             }
         });
     }
