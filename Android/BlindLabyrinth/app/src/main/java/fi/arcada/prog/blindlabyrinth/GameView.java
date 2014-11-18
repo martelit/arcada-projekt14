@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -30,6 +31,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     public Bitmap ballBitmap;
     public Ball ball;
+    public Map map;
     public Controller ctrl;
 
     //Default values given to a created ball.
@@ -46,6 +48,10 @@ public class GameView extends View implements Runnable, SensorEventListener {
         //images used for background and bitmaps are stored in app/src/main/java/res/drawable
         //this.setBackgroundResource(R.drawable.nameOfChosenLabyrinthBackgroundForGameScreen);
         ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
+
+        Bitmap map1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.mask1);
+
+        map = new Map(map1, map1);
 
         //This line has been somewhat changed so it can be used in GameView (context added before a few things).
         sensorManager=(SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -106,11 +112,14 @@ public class GameView extends View implements Runnable, SensorEventListener {
     //In other words code for what happens every counted frame during a game.
     protected void onDraw(Canvas canvas)
     {
+        if(map.checkCollision(ball.getPosition())) ball.handleCollision();
+
+        map.draw(canvas);
         if(!DEBUG_CONTROLS) {
             ball.move(acceleratorX, acceleratorY);
         } else {
-            PointF d = ctrl.getDirection();
-            ball.move(d.x * 10, d.y * 10);
+            Point d = ctrl.getDirection();
+            ball.move(d.x * 14, d.y * 14);
             ctrl.draw(canvas);
         }
         canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());

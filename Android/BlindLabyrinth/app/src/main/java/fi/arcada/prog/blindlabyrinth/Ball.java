@@ -1,5 +1,8 @@
 package fi.arcada.prog.blindlabyrinth;
 
+import android.graphics.Point;
+import android.util.Log;
+
 import java.util.ArrayList;
 
 /**
@@ -37,6 +40,17 @@ public class Ball extends GraphicsObject {
         if(xPosition > view.getWidth()-width && xSpeed > 0) xSpeedDoubleVersion *= -0.4;
         if(yPosition < 0 && ySpeed < 0) ySpeedDoubleVersion *= -0.4;
         if(yPosition > view.getHeight()-height && ySpeed > 0) ySpeedDoubleVersion *= -0.4;
+    }
+
+    public Point getPosition() {
+        //this value is passed to Map.checkCollision and should probably be edited to return
+        //the position of the part of the ball that might hit something (right now its the left-top corner)
+        return new Point(xPosition, yPosition);
+    }
+
+    public void handleCollision() {
+        //handle collision here, play a sound and reverse the directional velocity of the ball
+        Log.v("OMGOMG", "OMG IT WORKS");
     }
 
     //Method for moving the ball once with the current speed compared to where it was positioned before the call,
