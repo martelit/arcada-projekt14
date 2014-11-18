@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.util.Log;
 
 /**
  * Created by Linus on 11/14/2014.
@@ -52,10 +53,9 @@ public class Graphic {
         if(hitbox.contains(x, y)) {
             //so the hitbox contains the pixels, lets make sure that it isn't transparent
 
-            //int relativeX = Math.round(x - hitbox.left);
-            //int relativeY = Math.round(y - hitbox.top);
-            //Log.d("X", Float.toString(relativeX));
-            //Log.d("Y", Float.toString(relativeY));
+            int relativeX = Math.round(hitbox.left - x);
+            int relativeY = Math.round(hitbox.top - y);
+            Log.d("XY", Integer.toString(relativeX) + ":" + Integer.toString(relativeY));
 
             //int color = image.getPixel(x, y);
             //boolean transparent = (color & 0xff000000) == 0x0;

@@ -2,7 +2,7 @@ package fi.arcada.prog.blindlabyrinth;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.PointF;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 
@@ -15,9 +15,9 @@ public class Controller {
     private Graphic arrowDown;
     private Graphic arrowLeft;
 
-    private PointF basePos = new PointF();
+    private Point basePos = new Point();
 
-    private PointF direction = new PointF();
+    private Point direction = new Point();
 
     public Controller(Bitmap u, Bitmap r, Bitmap d, Bitmap l) {
         arrowUp = new Graphic(u);
@@ -27,7 +27,7 @@ public class Controller {
         setPosition(20, 20);
     }
 
-    public void setPosition(float x, float y) {
+    public void setPosition(int x, int y) {
         basePos.x = x;
         basePos.y = y;
 
@@ -37,7 +37,7 @@ public class Controller {
         arrowLeft.setPosition(basePos.x, basePos.y + 60);
     }
 
-    public PointF getDirection() {
+    public Point getDirection() {
         return direction;
     }
 
