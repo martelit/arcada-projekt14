@@ -4,12 +4,12 @@
     <feature name="Accelerometer">
         <param name="android-package" value="org.apache.cordova.devicemotion.AccelListener" />
     </feature>
-    <name>HelloWorld</name>
+    <name>BlindLabyrint</name>
     <description>
-        Hello World sample application that responds to the deviceready event.
+        Blind Labyrint app
     </description>
     <author email="support@phonegap.com" href="http://phonegap.com">
-        PhoneGap Team
+        PhoneGap Team Arcada
     </author>
     <preference name="permissions" value="none" />
     <preference name="phonegap-version" value="3.5.0" />
