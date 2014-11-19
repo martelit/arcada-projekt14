@@ -1,6 +1,7 @@
 package fi.arcada.prog.blindlabyrinth;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,7 +14,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 import android.view.View;
-
 import android.view.MotionEvent;
 /**
  * Created by rusty on 8.11.2014.
@@ -45,9 +45,26 @@ public class GameView extends View implements Runnable, SensorEventListener {
     public GameView(Context context) {
         super(context);
 
+        //Information about settings are stored in a SharedPreferences file called "blindLabyrinthPref".
+        SharedPreferences prefs = context.getSharedPreferences("blindLabyrinthPref", 0);
+
+        //Selects the ball depending on what settings have been given.
+        if(prefs.getString("ball", "nothing").equals("ball1")) {
+            ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
+        }
+        else if(prefs.getString("ball", "nothing").equals("ball2")) {
+            ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball2);
+        }
+        else if(prefs.getString("ball", "nothing").equals("ball3")) {
+            ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball3);
+        }
+        else {  //Gives default ball.
+            ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
+        }
+
         //images used for background and bitmaps are stored in app/src/main/java/res/drawable
         //this.setBackgroundResource(R.drawable.nameOfChosenLabyrinthBackgroundForGameScreen);
-        ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
+        //ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
 
         Bitmap map1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.mask1);
 
