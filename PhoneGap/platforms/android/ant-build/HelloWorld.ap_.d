@@ -29,6 +29,7 @@ E:\DEV\LabyrintApp\platforms\android\assets\www\cordova.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\cordova_plugins.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\css \
 E:\DEV\LabyrintApp\platforms\android\assets\www\game.html \
+E:\DEV\LabyrintApp\platforms\android\assets\www\gameTemp.html \
 E:\DEV\LabyrintApp\platforms\android\assets\www\icon.png \
 E:\DEV\LabyrintApp\platforms\android\assets\www\img \
 E:\DEV\LabyrintApp\platforms\android\assets\www\index.html \
@@ -43,6 +44,7 @@ E:\DEV\LabyrintApp\platforms\android\assets\www\css\index.css \
 E:\DEV\LabyrintApp\platforms\android\assets\www\img\logo.png \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\demos \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\images \
+E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery-1.11.1.min.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile-1.4.5.css \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile-1.4.5.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile-1.4.5.min.css \
@@ -60,6 +62,7 @@ E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile.structure-1
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile.structure-1.4.5.min.css \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile.theme-1.4.5.css \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile.theme-1.4.5.min.css \
+E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\velocity.min.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\demos\backbone-requirejs \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\demos\body-bar-classes \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\demos\button \

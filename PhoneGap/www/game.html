@@ -2,11 +2,48 @@
 <html>
   <head>
     <title>Gameboard</title>
-
-    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	
+	<!--<script type="text/javascript" src="https://raw.githubusercontent.com/julianshapiro/animate/master/animate.min.js"></script> -->
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>	
+	<script src="jQuery/jquery.mobile-1.4.5.min.js"></script>	
+	<script src="jQuery/jquery-1.11.1.min.js"></script>	
+	<script src="jQuery/velocity.min.js"></script>
     <script type="text/javascript" charset="utf-8">
 
+	//Define global variables
+	
+		//Ball movement definitions
+		var speedX = 0;
+		var speedY = 0;
+		
+		//Collision definitions
+		var collisionLeft = 0;
+		var collisionRight = 0;
+		var collisionTop = 0;
+		var collisionBottom = 0;
+	
+		//Boundary definitions
+		var boundaryLeft = 0;
+		var boundaryRight = $(window).width();
+		var boundaryTop = 0;
+		var boundaryBottom = $(window).height();
+		
+		//Ball definitions
+		var ball = null;
+		var ballPosition = null;
+		var ballLeft = 0;
+		var ballRight = 0;
+		var ballTop = 0;
+		var ballBottom = 0;
+		
+		//Acceleration definitions
+		var accX = 0;
+		var accY = 0;
+		
+		//Maxspeed definitions
+		var maxspeed = 7;
+	
+	
     // The watch id references the current `watchAcceleration`
     var watchID = null;
 
@@ -25,7 +62,7 @@
     function startWatch() {
 
         // Update acceleration every 0,003 seconds
-        var options = { frequency: 10 };
+        var options = { frequency: 30 };
 
         watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, options);
     }
@@ -42,71 +79,151 @@
     // onSuccess: Get a snapshot of the current acceleration
     //
     function onSuccess(acceleration) {    
-       	       	
-        var element = document.getElementById('accelerometer');	
        	
-        var ball = $("#ball");
-        var wall = $("#wall");
-        var ballPosition = ball.position();
-       	var leftBoundary = 0;
-       	var topBoundary = 0;  
-       	var rightBoundary = $(window).width() - ball.width();
-       	var bottomBoundary = $(window).height() - ball.height();
-       	var multiplier = 1;
-       	var maxspeed = 5 * multiplier;
-       	var animationspeed = 0.00005;
-       	
-       	//move upwards (acceleration.x is negative)
-       	//check the tilting and current ballposition/boundary relation
-       	if(acceleration.x < -1 && ballPosition.top >= topBoundary ) {
-       		if(acceleration.x > -5){
-       			$("#ball").animate({top:"+="+(acceleration.x*multiplier)},animationspeed);
-       		}
-       		else{
-       			$("#ball").animate({top:"-="+maxspeed},animationspeed);
-       		}
-       	}
-       	
-       	//move downwards (acceleration.x is positive)
-       	//check the tilting and current ballposition/boundary relation
-       	else if(acceleration.x > 1 && ballPosition.top <= bottomBoundary){
-       		if(acceleration.x < 5){
-       			$("#ball").animate({top:"+="+(acceleration.x*multiplier)},animationspeed);
-       		}
-       		else{
-       			$("#ball").animate({top:"+="+maxspeed},animationspeed);
-       		}
-       	}
-       	
-       	//move to the left (acceleration.y is negative)
-       	//check the tilting and current ballposition/boundary relation
-       	if(acceleration.y < -1 && ballPosition.left >= leftBoundary){
-       		if(acceleration.y > -5){
-       			$("#ball").animate({left:"+="+(acceleration.y*multiplier)},animationspeed);
-       		}
-       		else{
-       			$("#ball").animate({left:"-="+maxspeed},animationspeed);
-       		}
-       	}
-       	
-       	//move to the right (acceleration.y is positive)
-       	//check the tilting and current ballposition/boundary relation
-       	else if(acceleration.y > 1 && ballPosition.left <= rightBoundary){
-       		if(acceleration.y < 5){
-       			$("#ball").animate({left:"+="+(acceleration.y*multiplier)},animationspeed);
-       		}
-       		else{
-       			$("#ball").animate({left:"+="+maxspeed},animationspeed);
-       		}
-       	}
-       	
-       	element.innerHTML = 'Acceleration X: ' + acceleration.x + '<br />' +
-                            'Acceleration Y: ' + acceleration.y + '<br />' +
-                            'Coordinate top: ' + ballPosition.top + '<br />' +
-                            'Coordinate left: ' + ballPosition.left + '<br />';
-        
-       	
+		//Fetch BALL object
+		ball = $("#ball");
+		
+		//Fetch BALL POSITION
+		ballPosition = ball.position();
+		ballLeft = ballPosition.left;
+		ballRight = ballPosition.left + ball.width();
+		ballTop = ballPosition.top;
+		ballBottom = ballPosition.top + ball.height();
+		
+		//Fetch ACCELERATION values
+		accX = acceleration.y;
+		accY = acceleration.x;
+		
+		//MOVE TO RIGHT, accX is POSITIVE
+		if(accX > 1){
+			if(speedX <= 6){
+				if(speedX <= 0){
+					speedX += 1;
+				}
+				else{
+					speedX += 0.5;
+				}
+				//Check IF speed is higher than tilt angle
+				if(speedX >= accX){
+				speedX = accX;
+				}
+			}			
+		}
+		//MOVE TO LEFT, accX is NEGATIVE
+		else if(accX < -1){
+			if(speedX >= -6){
+				if(speedX >= 0){
+					speedX += -1;
+				}
+				else{
+					speedX += -0.5;
+				}
+				//Check IF speed is higher than tilt angle
+				if(speedX <= accX){
+				speedX = accX;
+				}
+			}
+		}
+		//SLOW DOWN, accX is NEUTRAL
+		else{
+			if(speedX > 0){
+				speedX += -0.25;
+			}
+			else if(speedX < 0){
+				speedX += 0.25;
+			}
+		}
+		//MOVE DOWNWARDS, accY is POSITIVE
+		if(accY > 1){
+			if(speedY <= 6){
+				if(speedY <= 0){
+					speedY += 1;
+				}
+				else{
+					speedY += 0.5;
+				}
+				//Check IF speed is higher than tilt angle
+				if(speedY >= accY){
+				speedY = accY;
+				}
+			}
+		}
+		//MOVE UPWARDS, accY is NEGATIVE
+		else if(accY < -1){
+			if(speedY >= -6){
+				if(speedY >= 0){
+					speedY += -1;
+				}
+				else{
+					speedY += -0.5;
+				}
+				//Check IF speed is higher than tilt angle
+				if(speedY <= accY){
+				speedY = accY;
+				}
+			}
+		}
+		//SLOW DOWN, accY is NEUTRAL
+		else{
+			if(speedY > 0){
+				speedY += -0.25;
+			}
+			else if(speedY < 0){
+				speedY += 0.25;
+			}
+		}
+		
+		//Check collision
+		checkCollision();		
+		//MOVE BALL
+		ball.velocity({top:"+="+speedY, left:"+="+speedX}, {duration: 0.1});
     }
+	
+	
+	function checkCollision(){
+		
+		//SCREEN collision		
+		//Check LEFT collision
+		if(ballLeft <= boundaryLeft && accX <= 0){
+			//Check IF speed is high enough to go through boundary
+			if((ballLeft + speedX) < boundaryLeft){
+				speedX = ballLeft * -1;
+			}
+			else{
+				speedX = 0;
+			}
+		}
+		//Check RIGHT collision
+		else if(ballRight >= boundaryRight  && accX >= 0){
+			//Check IF speed is high enough to go through boundary
+			if((ballRight + speedX) > boundaryRight){
+				speedX = boundaryRight - ballRight;
+			}
+			else{
+				speedX = 0;
+			}
+		}
+		//Check TOP collision
+		if(ballTop <= boundaryTop && accY <= 0){
+			//Check IF speed is high enough to go through boundary
+			if((ballTop + speedY) < boundaryTop){
+				speedY = ballTop * -1;
+			}
+			else{
+				speedY = 0;
+			}
+		}
+		//Check BOTTOM collision
+		else if(ballBottom >= boundaryBottom && accY >= 0){
+			//Check IF speed is high enough to go through boundary
+			if((ballBottom + speedY) > boundaryBottom){
+				speedY = boundaryBottom - ballBottom;
+			}
+			else{
+				speedY = 0;
+			}
+		}	
+	}
 
     // onError: Failed to get the acceleration
     //
@@ -117,11 +234,80 @@
     </script>
   </head>
   <body>
-    <div id="accelerometer">Waiting for accelerometer...</div>
-    <div id="ball" style="height:25px; width:25px; background-color:red; border-radius:50%; position:absolute; left:220px; top:200px;"></div>
+  
+  <!----------------------------------------------- SPELPLANEN ----------------------------------------------->
+    <div id="accelerometer"></div>
+    <div id="ball" style="height:25px; width:25px; background-color:red; border-radius:50%; position:absolute; left:50px; top:50px;"></div>
 	<div id="wall" style="height:60%; width:10px; background-color:black; position:absolute; left:20%;"></div>
 	<div id="wall" style="height:60%; width:10px; background-color:black; position:absolute; left:40%; bottom:0px;"></div>
 	<div id="wall" style="height:60%; width:10px; background-color:black; position:absolute; left:60%;"></div>
 	<div id="wall" style="height:60%; width:10px; background-color:black; position:absolute; left:80%; bottom:0px;"></div>
+  <!----------------------------------------------- SPELPLANEN -----------------------------------------------/>
   </body>
 </html>
+
+
+	//OLD ENGINE
+	/*
+        var element = document.getElementById('accelerometer');	
+		element.innerHTML = 'Acceleration X: ' + ballBottom + '<br />' +
+                            'Acceleration Y: ' + boundaryBottom + '<br />' +
+                            'Coordinate top: ' + ballPosition.top + '<br />' +
+                            'Coordinate left: ' + ballPosition.left + '<br />';
+     	
+        var ball = $("#ball");
+        var wall = $("#wall");
+        var ballPosition = ball.position();
+       	var boundaryLeft = 0;
+       	var boundaryTop = 0;  
+       	var boundaryRight = $(window).width() - ball.width();
+       	var boundaryBottom = $(window).height() - ball.height();
+       	var multiplier = 1;
+       	var maxspeed = 5 * multiplier;
+       	var animationspeed = 0.0000000005;
+       	
+       	//move upwards (acceleration.x is negative)
+       	//check the tilting and current ballposition/boundary relation
+       	if(acceleration.x < -1 && ballPosition.top >= boundaryTop ) {
+       		if(acceleration.x > -5){
+       			$("#ball").velocity({top:"+="+(acceleration.x*multiplier)},animationspeed);
+       		}
+       		else{
+       			$("#ball").velocity({top:"-="+maxspeed},animationspeed);
+       		}
+       	}
+       	
+       	//move downwards (acceleration.x is positive)
+       	//check the tilting and current ballposition/boundary relation
+       	else if(acceleration.x > 1 && ballPosition.top <= boundaryBottom){
+       		if(acceleration.x < 5){
+       			$("#ball").velocity({top:"+="+(acceleration.x*multiplier)},animationspeed);
+       		}
+       		else{
+       			$("#ball").velocity({top:"+="+maxspeed},animationspeed);
+       		}
+       	}
+       	
+       	//move to the left (acceleration.y is negative)
+       	//check the tilting and current ballposition/boundary relation
+       	if(acceleration.y < -1 && ballPosition.left >= boundaryLeft){
+       		if(acceleration.y > -5){
+       			$("#ball").velocity({left:"+="+(acceleration.y*multiplier)},animationspeed);
+       		}
+       		else{
+       			$("#ball").velocity({left:"-="+maxspeed},animationspeed);
+       		}
+       	}
+       	
+       	//move to the right (acceleration.y is positive)
+       	//check the tilting and current ballposition/boundary relation
+       	else if(acceleration.y > 1 && ballPosition.left <= boundaryRight){
+       		if(acceleration.y < 5){
+       			$("#ball").velocity({left:"+="+(acceleration.y*multiplier)},animationspeed);
+       		}
+       		else{
+       			$("#ball").velocity({left:"+="+maxspeed},animationspeed);
+       		}
+       	}
+        
+    */

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Gameboard</title>
+
+    <script type="text/javascript" charset="utf-8" src="cordova.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+
+    // The watch id references the current `watchAcceleration`
+    var watchID = null;
+
+    // Wait for Cordova to load
+    //
+    document.addEventListener("deviceready", onDeviceReady, false);
+
+    // Cordova is ready
+    //
+    function onDeviceReady() {
+        startWatch();
+    }
+
+    // Start watching the acceleration
+    //
+    function startWatch() {
+
+        // Update acceleration every 0,003 seconds
+        var options = { frequency: 10 };
+
+        watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, options);
+    }
+
+    // Stop watching the acceleration
+    //
+    function stopWatch() {
+        if (watchID) {
+            navigator.accelerometer.clearWatch(watchID);
+            watchID = null;
+        }
+    }
+
+    // onSuccess: Get a snapshot of the current acceleration
+    //
+    function onSuccess(acceleration) {    
+       	       	
+        var element = document.getElementById('accelerometer');	
+       	
+        var ball = $("#ball");
+        var wall = $("#wall");
+        var ballPosition = ball.position();
+       	var leftBoundary = 0;
+       	var topBoundary = 0;  
+       	var rightBoundary = $(window).width() - ball.width();
+       	var bottomBoundary = $(window).height() - ball.height();
+       	var multiplier = 1;
+       	var maxspeed = 5 * multiplier;
+       	var animationspeed = 0.00005;
+       	
+       	//move upwards (acceleration.x is negative)
+       	//check the tilting and current ballposition/boundary relation
+       	if(acceleration.x < -1 && ballPosition.top >= topBoundary ) {
+       		if(acceleration.x > -5){
+       			$("#ball").animate({top:"+="+(acceleration.x*multiplier)},animationspeed);
+       		}
+       		else{
+       			$("#ball").animate({top:"-="+maxspeed},animationspeed);
+       		}
+       	}
+       	
+       	//move downwards (acceleration.x is positive)
+       	//check the tilting and current ballposition/boundary relation
+       	else if(acceleration.x > 1 && ballPosition.top <= bottomBoundary){
+       		if(acceleration.x < 5){
+       			$("#ball").animate({top:"+="+(acceleration.x*multiplier)},animationspeed);
+       		}
+       		else{
+       			$("#ball").animate({top:"+="+maxspeed},animationspeed);
+       		}
+       	}
+       	
+       	//move to the left (acceleration.y is negative)
+       	//check the tilting and current ballposition/boundary relation
+       	if(acceleration.y < -1 && ballPosition.left >= leftBoundary){
+       		if(acceleration.y > -5){
+       			$("#ball").animate({left:"+="+(acceleration.y*multiplier)},animationspeed);
+       		}
+       		else{
+       			$("#ball").animate({left:"-="+maxspeed},animationspeed);
+       		}
+       	}
+       	
+       	//move to the right (acceleration.y is positive)
+       	//check the tilting and current ballposition/boundary relation
+       	else if(acceleration.y > 1 && ballPosition.left <= rightBoundary){
+       		if(acceleration.y < 5){
+       			$("#ball").animate({left:"+="+(acceleration.y*multiplier)},animationspeed);
+       		}
+       		else{
+       			$("#ball").animate({left:"+="+maxspeed},animationspeed);
+       		}
+       	}
+       	
+       	element.innerHTML = 'Acceleration X: ' + acceleration.x + '<br />' +
+                            'Acceleration Y: ' + acceleration.y + '<br />' +
+                            'Coordinate top: ' + ballPosition.top + '<br />' +
+                            'Coordinate left: ' + ballPosition.left + '<br />';
+        
+       	
+    }
+
+    // onError: Failed to get the acceleration
+    //
+    function onError() {
+        alert('onError!');
+    }
+	
+	// Fill the Gameboard
+	var canvas = "";
+	var ctx = "";
+
+	function lightTrail(){
+
+		var int=self.setInterval(function(){clock()},500); //remove to make light trail stay.
+		
+		canvas = document.createElement("canvas");
+		
+		canvas.width = window.innerWidth;
+		canvas.height= window.innerHeight;
+		canvas.style.position = "absolute";
+		canvas.style.top = "0px";
+		canvas.style.left = "0px";
+		var objTo = document.getElementById("gameboard");
+		objTo.appendChild(canvas);
+		
+		ctx = canvas.getContext('2d');
+		
+		ctx.globalAlpha = 1;
+		ctx.fillStyle = "rgb(0, 0, 0)";
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+		
+		ctx.globalCompositeOperation = 'destination-out';    
+			
+		function drawPoint(pointX,pointY){
+			
+			///trail
+			var grd = ctx.createLinearGradient(pointX - 75,pointY-5,pointX + 75,pointY + 5)
+
+	  grd.addColorStop(0, "transparent"); 
+	  grd.addColorStop(0.3, "rgba(255,255,255,.6)"); 
+	  grd.addColorStop(0.7, "rgba(255,255,255,.6)"); 
+	  grd.addColorStop(1, "transparent"); 
+				   
+	  ctx.fillStyle = grd;
+		ctx.fillRect(pointX - 75,pointY,400,30);
+
+			}
+				
+	canvas.addEventListener('mousemove',function(e){
+					e.preventDefault();
+					drawPoint(e.pageX,e.pageY);
+				},false);
+		
+	}
+
+
+	function clock(){
+	ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "rgb(0, 0, 0)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalCompositeOperation = 'destination-out';    
+	}
+
+    </script>
+  </head>
+  <body onLoad="lightTrail()">
+	<div id="gameboard">
+		<div id="accelerometer">Waiting for accelerometer...</div>
+		<div id="ball" style="height:25px; width:25px; background-color:red; border-radius:50%; position:absolute; left:220px; top:200px;"></div>
+		<div id="wall" style="height:60%; width:10px; background-color:black; position:absolute; left:20%;"></div>
+		<div id="wall" style="height:60%; width:10px; background-color:black; position:absolute; left:40%; bottom:0px;"></div>
+		<div id="wall" style="height:60%; width:10px; background-color:black; position:absolute; left:60%;"></div>
+		<div id="wall" style="height:60%; width:10px; background-color:black; position:absolute; left:80%; bottom:0px;"></div>
+	</div>
+  </body>
+</html>
