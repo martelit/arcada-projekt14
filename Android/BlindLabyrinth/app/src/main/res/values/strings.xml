@@ -8,6 +8,7 @@
     <string name="title_activity_game">GameActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="arcada_inc">Arcada\nIncorporated</string>
     <string name="title_activity_accelerometer">Accelerometer</string>
     <string name="title_activity_game_view_blank">GameViewBlank</string>
     <string name="title_activity_settings">Settings</string>

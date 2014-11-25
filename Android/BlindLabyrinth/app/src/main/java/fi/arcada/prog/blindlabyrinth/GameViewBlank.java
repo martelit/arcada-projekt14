@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
 
+
 //Activity to draw the contents of GameView with setContentView(new GameView(this)).
 //Probably not necessary or optimal code, but for a beginner like me it was the only solution I knew.
 public class GameViewBlank extends Activity {
@@ -20,6 +21,9 @@ public class GameViewBlank extends Activity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(new GameView(this));
+
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
 
