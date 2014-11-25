@@ -43,14 +43,48 @@ public class Ball extends GraphicsObject {
     }
 
     public Point getPosition() {
-        //this value is passed to Map.checkCollision and should probably be edited to return
-        //the position of the part of the ball that might hit something (right now its the left-top corner)
         return new Point(xPosition, yPosition);
     }
 
-    public void handleCollision() {
-        //handle collision here, play a sound and reverse the directional velocity of the ball
-        Log.v("OMGOMG", "OMG IT WORKS");
+    public Point getTop() {
+        return new Point(xPosition + width / 2, yPosition);
+    }
+    public Point getRight() {
+        return new Point(xPosition + width, yPosition + height);
+    }
+    public Point getBottom() {
+        return new Point(xPosition + width / 2, yPosition + height);
+    }
+    public Point getLeft() {
+        return new Point(xPosition, yPosition + height / 2);
+    }
+
+    public void updateRect() {
+        size.set(xPosition, yPosition, xPosition+width, yPosition+height);
+    }
+    public void handleCollisionTop() {
+        Log.d("collision", "top");
+        ySpeedDoubleVersion *= -0.4;
+        yPosition += 4;
+        updateRect();
+    }
+    public void handleCollisionRight() {
+        Log.d("collision", "right");
+        xSpeedDoubleVersion *= -0.4;
+        xPosition -= 4;
+        updateRect();
+    }
+    public void handleCollisionBottom() {
+        Log.d("collision", "bottom");
+        ySpeedDoubleVersion *= -0.4;
+        yPosition -= 4;
+        updateRect();
+    }
+    public void handleCollisionLeft() {
+        Log.d("collision", "left");
+        xSpeedDoubleVersion *= -0.4;
+        xPosition += 4;
+        updateRect();
     }
 
     //Method for moving the ball once with the current speed compared to where it was positioned before the call,

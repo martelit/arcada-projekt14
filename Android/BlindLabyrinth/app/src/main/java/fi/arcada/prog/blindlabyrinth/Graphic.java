@@ -25,18 +25,12 @@ public class Graphic {
     public void setSize(int width, int height) {
         dimension.x = width;
         dimension.y = height;
+        image = Bitmap.createScaledBitmap(image, width, height, false);
     }
 
-    public void setSize(PointF size) {
-        dimension = size;
-    }
 
     public void setPosition(float x, float y) {
         hitbox.set(x, y, x + dimension.x, y + dimension.y);
-    }
-
-    public void setPosition(PointF pos) {
-        hitbox.set(pos.x, pos.y, pos.x + dimension.x, pos.y + dimension.y);
     }
 
     public void draw(Canvas c) {
@@ -53,9 +47,9 @@ public class Graphic {
         if(hitbox.contains(x, y)) {
             //so the hitbox contains the pixels, lets make sure that it isn't transparent
 
-            int relativeX = Math.round(hitbox.left - x);
-            int relativeY = Math.round(hitbox.top - y);
-            Log.d("XY", Integer.toString(relativeX) + ":" + Integer.toString(relativeY));
+            //int relativeX = Math.round(hitbox.left - x);
+            //int relativeY = Math.round(hitbox.top - y);
+            //Log.d("XY", Integer.toString(relativeX) + ":" + Integer.toString(relativeY));
 
             //int color = image.getPixel(x, y);
             //boolean transparent = (color & 0xff000000) == 0x0;

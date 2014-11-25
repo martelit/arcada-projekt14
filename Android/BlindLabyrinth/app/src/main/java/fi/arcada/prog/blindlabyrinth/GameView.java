@@ -48,7 +48,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     //Default values given to a created ball.
     //Free to be changed later on.
-    public int ballXStartPosition = 20, ballYStartPosition = 20;
+    public int ballXStartPosition = 60, ballYStartPosition = 60;
     public int ballWidth = 50, ballHeight = 50;
     public int ballXStartSpeed = 0, ballYStartSpeed = 0;
 
@@ -121,7 +121,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
         Bitmap map1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.mask1);
 
-        map = new Map(map1, map1);
+        map = new Map(map1, map1, this);
 
         //This line has been somewhat changed so it can be used in GameView (context added before a few things).
         sensorManager=(SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -182,7 +182,10 @@ public class GameView extends View implements Runnable, SensorEventListener {
     //In other words code for what happens every counted frame during a game.
     protected void onDraw(Canvas canvas)
     {
-        if(map.checkCollision(ball.getPosition())) ball.handleCollision();
+        if(map.checkCollision(ball.getTop())) ball.handleCollisionTop();
+        else if(map.checkCollision(ball.getBottom())) ball.handleCollisionBottom();
+        if(map.checkCollision(ball.getRight())) ball.handleCollisionRight();
+        else if(map.checkCollision(ball.getLeft())) ball.handleCollisionLeft();
 
         map.draw(canvas);
         if(!DEBUG_CONTROLS) {
