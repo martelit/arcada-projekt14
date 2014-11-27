@@ -169,7 +169,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     //Responsible for creating/launching/resetting everything needed for a new game to begin.
     public void startGame() {
-        ball = new Ball(map.startX(), map.startY(), ballWidth, ballHeight, Color.BLUE, this, ballXStartSpeed, ballYStartSpeed);
+        ball = new Ball(map.startX(), map.startY(), map.ballSize(), map.ballSize(), Color.BLUE, this, ballXStartSpeed, ballYStartSpeed);
         createThreads();
     }
 
