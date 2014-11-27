@@ -48,6 +48,8 @@ public class GameView extends View implements Runnable, SensorEventListener {
     SharedPreferences prefs;
     String gameMode;
     String size;
+    int multiplierOne;
+    int multiplierTwo;
 
     //Default values given to a created ball.
     //Free to be changed later on.
@@ -88,18 +90,23 @@ public class GameView extends View implements Runnable, SensorEventListener {
         //Selects the visibility depending on what settings have been given.
         if(prefs.getString("gameMode", "nothing").equals("trailblazer")) {
             gameMode = "trailblazer";
+            multiplierOne = 2;
         }
         else if(prefs.getString("gameMode", "nothing").equals("glowstick")) {
             gameMode = "glowstick";
+            multiplierOne = 3;
         }
         else if(prefs.getString("gameMode", "nothing").equals("darkness")) {
             gameMode = "darkness";
+            multiplierOne = 4;
         }
         else if(prefs.getString("gameMode", "nothing").equals("lights_on")) {
             gameMode = "lights_on";
+            multiplierOne = 1;
         }
         else {  //Gives default visibility.
             gameMode = "lights_on";
+            multiplierOne = 1;
         }
 
         Log.v("gameMode", gameMode);
@@ -107,15 +114,19 @@ public class GameView extends View implements Runnable, SensorEventListener {
         //Selects the size depending on what settings have been given.
         if(prefs.getString("size", "nothing").equals("small")) {
             size = "small";
+            multiplierTwo = 1;
         }
         else if(prefs.getString("size", "nothing").equals("medium")) {
             size = "medium";
+            multiplierTwo = 2;
         }
         else if(prefs.getString("size", "nothing").equals("large")) {
             size = "large";
+            multiplierTwo = 3;
         }
         else {  //Gives default size.
             size = "small";
+            multiplierTwo = 1;
         }
 
         //images used for background and bitmaps are stored in app/src/main/java/res/drawable
@@ -192,6 +203,10 @@ public class GameView extends View implements Runnable, SensorEventListener {
     {
         if(map.isCompleted(ball.getPosition())) {
             //Hooray, move to another screen or something... This is the "End event trigger"
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("score", prefs.getInt("score", 0) + (multiplierOne * multiplierTwo));
+            editor.commit();
+
             Log.v("END", "The ball is in the goal");
         }
 
