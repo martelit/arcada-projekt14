@@ -19,8 +19,11 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.MotionEvent;
+import android.view.WindowManager;
+
 /**
  * Created by rusty on 8.11.2014.
  */
@@ -33,7 +36,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
     float acceleratorY = 0;
     float acceleratorZ = 0;
 
-    boolean DEBUG_CONTROLS = true;
+    boolean DEBUG_CONTROLS = false;
 
     public Bitmap ballBitmap;
     public Ball ball;
@@ -121,7 +124,12 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
         Bitmap map1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.mask1);
 
-        map = new Map(map1, map1, this);
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point displaySize = new Point();
+        display.getSize(displaySize);
+
+        map = new Map(map1, map1, map1, map1, displaySize.x);
 
         //This line has been somewhat changed so it can be used in GameView (context added before a few things).
         sensorManager=(SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -150,7 +158,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     //Responsible for creating/launching/resetting everything needed for a new game to begin.
     public void startGame() {
-        ball = new Ball(ballXStartPosition, ballYStartPosition, ballWidth, ballHeight, Color.BLUE, this, ballXStartSpeed, ballYStartSpeed);
+        ball = new Ball(map.startX(), map.startY(), ballWidth, ballHeight, Color.BLUE, this, ballXStartSpeed, ballYStartSpeed);
         createThreads();
     }
 
@@ -182,6 +190,16 @@ public class GameView extends View implements Runnable, SensorEventListener {
     //In other words code for what happens every counted frame during a game.
     protected void onDraw(Canvas canvas)
     {
+        if(map.isCompleted(ball.getPosition())) {
+            //Hooray, move to another screen or something... This is the "End event trigger"
+            Log.v("END", "The ball is in the goal");
+        }
+
+        if(map.findsToken(ball.getPosition())) {
+            //Yay, we found a token, add the counter graphics and play a sound
+            Log.v("TOKEN", "Token found");
+        }
+
         if(map.checkCollision(ball.getTop())) ball.handleCollisionTop();
         else if(map.checkCollision(ball.getBottom())) ball.handleCollisionBottom();
         if(map.checkCollision(ball.getRight())) ball.handleCollisionRight();
@@ -189,7 +207,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
         map.draw(canvas);
         if(!DEBUG_CONTROLS) {
-            ball.move(acceleratorX, acceleratorY);
+            ball.move(acceleratorX * -1, acceleratorY);
         } else {
             Point d = ctrl.getDirection();
             ball.move(d.x * 14, d.y * 14);
@@ -256,8 +274,8 @@ public class GameView extends View implements Runnable, SensorEventListener {
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        float x = event.getX();
-        float y = event.getY();
+        int x = Math.round(event.getX());
+        int y = Math.round(event.getY());
         switch(event.getAction())
         {
             case MotionEvent.ACTION_DOWN:
@@ -285,6 +303,5 @@ public class GameView extends View implements Runnable, SensorEventListener {
             acceleratorZ=event.values[2];
         }
     }
-
 
 }
