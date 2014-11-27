@@ -103,8 +103,8 @@ public class Ball extends GraphicsObject {
         friction = 0.993;
 
         //Acceleration values are taken from the method's in parameters here.
-        //accelerationX = ((double) acceleratorX)*(-1.0);   //Movement in the x-axis seemed to be reverse of what was needed, so the value is now taken times minus one.
-        accelerationX = (double) acceleratorX;  //Testing on an actual android suggested reversed movement with this line. I don't have a phone myself to test it, but anyone is welcome to confirm this and swap this row with the one above.
+        //accelerationX = (double) acceleratorX;  //Testing on an actual android suggested reversed movement with this line. I don't have a phone myself to test it, but anyone is welcome to confirm this and swap this row with the one above.
+        accelerationX = ((double) acceleratorX)*(-1.0);   //Movement in the x-axis seemed to be reverse of what was needed, so the value is now taken times minus one.
         accelerationY = (double) acceleratorY;
 
         //Ignores minor acceleration values given by the accelerometer.
