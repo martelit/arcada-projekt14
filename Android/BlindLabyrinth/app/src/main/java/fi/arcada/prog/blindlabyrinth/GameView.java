@@ -222,7 +222,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
         map.draw(canvas);
         if(!DEBUG_CONTROLS) {
-            ball.move(acceleratorX * -1, acceleratorY);
+            ball.move(acceleratorX, acceleratorY);
         } else {
             Point d = ctrl.getDirection();
             ball.move(d.x * 14, d.y * 14);
