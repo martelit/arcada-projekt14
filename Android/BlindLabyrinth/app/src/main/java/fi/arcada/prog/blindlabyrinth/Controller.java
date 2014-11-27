@@ -57,9 +57,9 @@ public class Controller {
             direction.y = 0;
         }
         if(arrowLeft.contains(x, y)) {
-            direction.x = -1;
-        } else if(arrowRight.contains(x, y)) {
             direction.x = 1;
+        } else if(arrowRight.contains(x, y)) {
+            direction.x = -1;
         } else {
             direction.x = 0;
         }

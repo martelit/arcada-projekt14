@@ -26,6 +26,11 @@ public class GraphicsObject {
     protected double xSpeedDoubleVersion, ySpeedDoubleVersion;
     protected double xSpeedDoubleVersionTempOldValue, ySpeedDoubleVersionTempOldValue;
     protected double xDistanceImaginary, yDistanceImaginary;
+    protected double preemptiveXSpeed, preemptiveYSpeed;
+    protected double preemptiveXDistance, preemptiveYDistance;
+
+    ArrayList<ArrayList> ballCoordinatesList;
+    ArrayList<Integer> collisionPointXAndYPos;
 
     protected ArrayList<Double> speedAndLeftoverDecimal;
 
@@ -51,6 +56,9 @@ public class GraphicsObject {
 
         xDistanceImaginary = 0;
         yDistanceImaginary = 0;
+
+        ballCoordinatesList = new ArrayList<ArrayList>();
+        collisionPointXAndYPos = new ArrayList<Integer>();
     }
 
     //Call this if you need the positional data/size for a rectangle formed object.

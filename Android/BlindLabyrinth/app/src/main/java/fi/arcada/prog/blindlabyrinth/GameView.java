@@ -54,7 +54,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
     //Default values given to a created ball.
     //Free to be changed later on.
     public int ballXStartPosition = 60, ballYStartPosition = 60;
-    public int ballWidth = 50, ballHeight = 50;
+    public int ballWidth = 11, ballHeight = 11;
     public int ballXStartSpeed = 0, ballYStartSpeed = 0;
 
     private SensorManager sensorManager;
@@ -215,19 +215,21 @@ public class GameView extends View implements Runnable, SensorEventListener {
             Log.v("TOKEN", "Token found");
         }
 
-        if(map.checkCollision(ball.getTop())) ball.handleCollisionTop();
+        /*if(map.checkCollision(ball.getTop())) ball.handleCollisionTop();
         else if(map.checkCollision(ball.getBottom())) ball.handleCollisionBottom();
         if(map.checkCollision(ball.getRight())) ball.handleCollisionRight();
-        else if(map.checkCollision(ball.getLeft())) ball.handleCollisionLeft();
+        else if(map.checkCollision(ball.getLeft())) ball.handleCollisionLeft();*/
 
         map.draw(canvas);
         if(!DEBUG_CONTROLS) {
-            ball.move(acceleratorX, acceleratorY);
+            ball.move(acceleratorX, acceleratorY, map);
         } else {
             Point d = ctrl.getDirection();
-            ball.move(d.x * 14, d.y * 14);
+            ball.move(d.x * 14, d.y * 14, map);
             ctrl.draw(canvas);
         }
+
+        //Draws the ball.
         canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
 
         //Decides how much darkness is drawn in addition to the labyrinth and the ball.
@@ -261,29 +263,6 @@ public class GameView extends View implements Runnable, SensorEventListener {
         else if(gameMode.equals("lights_on")) {
             //Nothing really needs to be done here, at least not for now.
         }
-
-        //Some old code I used while testing. Leaving it here for now, in case it will be needed later for some reason.
-        //___________________________________________________________________________________________________________________________________________________________________________________________________________
-        //first fill everything with your covering color
-        //canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), paint);
-        //now clear out the area you want to see through
-        //transparentPaint.setAlpha(0xFF);
-        //transparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        //transparentPaint.setARGB(128, 255, 255, 255);
-        //Rect rect = new Rect(ball.getPosition().x-50, ball.getPosition().y-50, ball.getPosition().x-50+ball.width+100, ball.getPosition().y-50+ball.height+100);//make this your rect!
-        //Rect rect = new Rect(50, 50, 700, 700);//make this your rect!
-        //canvas.drawRect(rect, transparentPaint);
-        //canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
-
-        //DIFFERENCE doesn't support hardware acceleration (maybe only in some older versions of Android, not sure)
-        //canvas.clipRect(rect, Region.Op.DIFFERENCE);
-
-        // Rectangle down right-hand side
-        //canvas.clipRect(new Rect(50, 0, 100, 100));
-        // Rectangle across bottom. This overlaps with the
-        // above, but that doesn't matter.
-        //canvas.clipRect(new Rect(0, 50, 100, 100), Region.Op.UNION);
-        //___________________________________________________________________________________________________________________________________________________________________________________________________________
     }
 
     @Override

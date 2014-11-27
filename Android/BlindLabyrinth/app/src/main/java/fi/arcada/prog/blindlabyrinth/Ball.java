@@ -23,17 +23,7 @@ public class Ball extends GraphicsObject {
     }
 
     //For checking if the ball has collided with something of interest.
-    public void checkCollisions()
-    {
-        //OLD POORLY DESIGNED CODE BELOW. NOT RECOMMENDED FOR USAGE IF IT CAN BE AVOIDED.
-        //___________________________________________________________________________________________________________________________________________________________________________________________________________
-        //Before checking for collisions and altering xSpeedDoubleVersion or ySpeedDoubleVersion, these should be saved temporarily.
-        //The last value is important due to there still being code after checkCollisions that relies on the old value.
-        /*
-        xSpeedDoubleVersionTempOldValue = xSpeedDoubleVersion;
-        ySpeedDoubleVersionTempOldValue = ySpeedDoubleVersion;
-        */
-        //___________________________________________________________________________________________________________________________________________________________________________________________________________
+    public void checkCollisions() {
 
         //Check for collisions against the edges of the screen.
         if(xPosition < 0 && xSpeed < 0) xSpeedDoubleVersion *= -0.4;
@@ -89,7 +79,7 @@ public class Ball extends GraphicsObject {
 
     //Method for moving the ball once with the current speed compared to where it was positioned before the call,
     //in other words updates its position for the next drawing.
-    public void move(float acceleratorX, float acceleratorY)
+    public void move(float acceleratorX, float acceleratorY, Map map)
     {
         //Code for using an acceleration formula to decide the ball's movement.
         //Works, but is used for meters and seconds in real life, so adjustment of values is needed to get movement that makes sense.
@@ -166,54 +156,25 @@ public class Ball extends GraphicsObject {
         //xSpeed = (int) Math.round(acceleratorX);
         //ySpeed = (int) Math.round(acceleratorY);
 
+        //Fills a list with many small lists of paired x and y values which each represent one dot on the outer line of the ball.
+        for(int angle = 0; angle < 360; angle += 15) {
+            collisionPointXAndYPos = getCircleXAndYPosition(angle);
+            ballCoordinatesList.add(collisionPointXAndYPos);
+        }
+
+        //Launches a preemptive check for collisions during the coming movement of the ball on any black dots on the labyrinth map.
+        //If collision is detected, appropriate action is taken, such as removing the ball from the area of collision and giving it new speed values.
+        preemptiveCollisionCheck(map);
+
+        //Clears the list so it's ready for the next time move() is called.
+        ballCoordinatesList.clear();
+
         //Updates xPosition and yPosition with new values according to the current speed.
         xPosition = xPosition + xSpeed;
         yPosition = yPosition + ySpeed;
 
         //Before correct movement can be chosen, a check for collisions should run, since that could affect direction and strength of the speed.
         checkCollisions();
-
-        //OLD POORLY DESIGNED CODE BELOW. NOT RECOMMENDED FOR USAGE IF IT CAN BE AVOIDED.
-        //___________________________________________________________________________________________________________________________________________________________________________________________________________
-        //This is where new values for the ball's location are given.
-        //To keep the ball from sinking in to the screen some checks need to be in place before any new position will be given.
-        //This part handles the temporary values for xSpeedDoubleVersion and ySpeedDoubleVersion, since the new ones already given
-        //represent data for the next time.
-        /*if(!(xPosition <= 1 && xSpeed < 0 && xSpeedDoubleVersionTempOldValue <= 0 && xSpeedDoubleVersionTempOldValue > -1)
-                &&
-                !(xPosition >= view.getWidth()-width-1 && xSpeed > 0 && xSpeedDoubleVersionTempOldValue >= 0 && xSpeedDoubleVersionTempOldValue < 1))
-        {
-            Log.v("Bounce, ", "xPosition" + xPosition+ " xSpeed"+xSpeed+" xSpeedDoubleVersiont"+xSpeedDoubleVersionTempOldValue);
-            xPosition = xPosition + xSpeed;
-        }
-        else {
-            if(xPosition < 1) {
-                Log.v("Glue, ", "xPosition" + xPosition+ " xSpeed"+ySpeed+" xSpeedDoubleVersiont"+xSpeedDoubleVersionTempOldValue);
-                xPosition = 1;
-            }
-            else if(xPosition > view.getWidth()-width-1) {
-                xPosition = view.getWidth()-width-1;
-            }
-            xSpeedDoubleVersion = 0;
-        }
-        if(!(yPosition <= 1 && ySpeed < 0 && ySpeedDoubleVersionTempOldValue <= 0 && ySpeedDoubleVersionTempOldValue > -1)
-                &&
-                !(yPosition >= view.getHeight()-height-1 && ySpeed > 0 && ySpeedDoubleVersionTempOldValue >= 0 && ySpeedDoubleVersionTempOldValue < 1))
-        {
-            //Log.v("Bounce, ", "yPosition" + yPosition+ " ySpeed"+ySpeed+" ySpeedDoubleVersiont"+ySpeedDoubleVersionTempOldValue);
-            yPosition = yPosition + ySpeed;
-        }
-        else {
-            //Log.v("Glue, ", "yPosition" + yPosition+ " ySpeed"+ySpeed+" ySpeedDoubleVersiont"+ySpeedDoubleVersionTempOldValue);
-            if(yPosition < 1) {
-                yPosition = 1;
-            }
-            else if(yPosition > view.getHeight()-height-1) {
-                yPosition = view.getHeight()-height-1;
-            }
-            ySpeedDoubleVersion = 0;
-        }*/
-        //___________________________________________________________________________________________________________________________________________________________________________________________________________
 
         //Last checks if either of the positions are outside the allowed field and if that's the case, moves them inside again before the actual size position is updated.
         if(xPosition < 1) {
@@ -230,7 +191,8 @@ public class Ball extends GraphicsObject {
         }
 
         //The position of the ball is set here, based on what has happened to xPosition and yPosition before.
-        size.set(xPosition, yPosition, xPosition+width, yPosition+height);
+        //size.set(xPosition, yPosition, xPosition+width, yPosition+height);
+        updateRect();
     }
 
     //Method to use in conjunction with the acceleration formula to get values for the ball's movement.
@@ -265,5 +227,86 @@ public class Ball extends GraphicsObject {
             list.add(d);
             return list;
         }
+    }
+
+    //For calculating a point (x and y location from the middle point of a square figure) on the ball's outer edge based on an angle given.
+    public ArrayList<Integer> getCircleXAndYPosition(int angle) {
+        ArrayList<Integer> CircleXAndYPos = new ArrayList<Integer>();
+
+        //The math happens here, using sin/cos to get the values needed.
+        CircleXAndYPos.add((int) Math.round((width/2)*Math.cos(angle))+xPosition+Math.round(width/2));
+        CircleXAndYPos.add((int) Math.round((width/2)*Math.sin(angle))+yPosition+Math.round(height/2));
+
+        return CircleXAndYPos;
+    }
+
+    //Checks if the next movement is going to collide with a wall (black pixel on the map) before any actual movement is made.
+    //If contact is found, the ball will be backtracked on its own path until it doesn't touch a wall anymore.
+    //Anything else can be done to it afterwards depending on what's needed.
+    public void preemptiveCollisionCheck(Map map) {
+
+        //The possibly high x and y speeds of the current attempted movement will first need to be broken up into smaller parts.
+        //This way no matter how high the speed, the ball will always collide with the first obstacle and not for example totally fly through a wall or collide with a pixel in the middle of a wall.
+        //In order to do this, the bigger value can't be above 1 pixel per comparison/tick (part of the actual frame seen in-game). The smaller one will then be divided with the bigger one for something between 0 and under 1.
+        //Absolute values (never negative, >= 0) are used, since xSpeed and/or ySpeed could be negative. Perhaps it doesn't matter all that much, but I tried to keep it simple and clear for myself.
+        if(Math.abs(xSpeed) > Math.abs(ySpeed)) {   //When xSpeed is larger than ySpeed, this runs, making the test run 1 pixel in x-axis every tick, while y is something less, resulting in 0 and 1 pixel ticks.
+            preemptiveXSpeed = 1;
+            preemptiveYSpeed = (double) Math.abs(ySpeed)/(double) Math.abs(xSpeed);
+        }
+        else if(Math.abs(xSpeed) < Math.abs(ySpeed)) {  //Same as above, but when ySpeed is larger than xSpeed.
+            preemptiveYSpeed = 1;
+            preemptiveXSpeed = (double) Math.abs(xSpeed)/(double) Math.abs(ySpeed);
+        }
+        else {  //For when both xSpeed and ySpeed are the same. Results in both ticking for 1 pixel until collision is made, or until the total attempted distance is moved without one.
+            preemptiveXSpeed = 1;
+            preemptiveYSpeed = 1;
+        }
+
+        //This is a compensation for not using negative values above. If xSpeed or ySpeed is currently negative, the ticks should also be, so as not to move in the wrong direction.
+        if(xSpeed < 0) preemptiveXSpeed *= -1;
+        if(ySpeed < 0) preemptiveYSpeed *= -1;
+
+        //While loop that runs until the absolute value of the distance moved in either x-axis or y-axis by ticks is the same as the attempted xSpeed or ySpeed depending on direction.
+        //Both of there conditions need to match, but logically they should both match exactly after the same amount of ticks (the higher value of xSpeed and ySpeed for the current frame), unless one of them was 0 to begin with,
+        // or there are some minor decimal errors...
+        while(Math.abs(preemptiveXDistance) < Math.abs(xSpeed) || Math.abs(preemptiveYDistance) < Math.abs(ySpeed)) {
+
+            //While the while runs, the preemptive imaginary distance traveled in each direction is increased with the values given earlier for each tick.
+            preemptiveXDistance += preemptiveXSpeed;
+            preemptiveYDistance += preemptiveYSpeed;
+
+            //Once values for a new tick are given, a check needs to run for each of the dots on the outer line of the ball where the user wants collision checks to occur.
+            //This amount is decided by a for loop in the move() method, where lower angle values give more dots to check on the ball's outer line.
+            for(ArrayList<Integer> listObj : ballCoordinatesList) { //The for itself takes an ArrayList (ballCoordinatesList) that contains even more ArrayLists (of collisionPointXAndYPos, each containing 2 integers, namely one set of x- and y coordinates).
+
+                //If collision is found for any of the paired x- and y coordinates (representing one dot on the outer line), this runs.
+                if(map.checkCollision(new Point(listObj.get(0) + (int) preemptiveXDistance, listObj.get(1) + (int) preemptiveYDistance))) {
+
+                    //Since collision happened, a correct combination of xSpeed and ySpeed was found just one tick before the one that caused a collision.
+                    //These speeds will now be given as the true values for xSpeed and ySpeed for the coming frame visible to the player, resulting with the ball moving just beside a wall with one or more of its collision points.
+                    xSpeed = (int) (preemptiveXDistance-preemptiveXSpeed);
+                    ySpeed = (int) (preemptiveYDistance-preemptiveYSpeed);
+
+                    //This is just to ensure the while above breaks.
+                    preemptiveXDistance = xSpeed;
+                    preemptiveYDistance = ySpeed;
+
+                    //Glues the ball on hit. Removed after proper bouncing has been coded. Until then it's recommended to keep.
+                    xSpeedDoubleVersion = 0;
+                    ySpeedDoubleVersion = 0;
+
+                    //If collision occurs, the loop is no longer needed and break is called.
+                    break;
+                }
+            }
+
+            //If the while loop reaches this stage without the for loop activating if() for collision detection, one tick of movement has successfully been made without collision in any of the points the user wants to check.
+        }
+
+        //Once all is said and done, the values used by this method are reset so they are ready to be used again during the next frame.
+        preemptiveXSpeed = 0;
+        preemptiveYSpeed = 0;
+        preemptiveXDistance = 0;
+        preemptiveYDistance = 0;
     }
 }
