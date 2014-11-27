@@ -65,25 +65,25 @@ public class Ball extends GraphicsObject {
     public void handleCollisionTop() {
         Log.d("collision", "top");
         ySpeedDoubleVersion *= -0.4;
-        yPosition += 4;
+        yPosition += 1;
         updateRect();
     }
     public void handleCollisionRight() {
         Log.d("collision", "right");
         xSpeedDoubleVersion *= -0.4;
-        xPosition -= 4;
+        xPosition -= 1;
         updateRect();
     }
     public void handleCollisionBottom() {
         Log.d("collision", "bottom");
         ySpeedDoubleVersion *= -0.4;
-        yPosition -= 4;
+        yPosition -= 1;
         updateRect();
     }
     public void handleCollisionLeft() {
         Log.d("collision", "left");
         xSpeedDoubleVersion *= -0.4;
-        xPosition += 4;
+        xPosition += 1;
         updateRect();
     }
 

@@ -2,7 +2,9 @@ package fi.arcada.prog.blindlabyrinth;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
 
@@ -12,8 +14,9 @@ import android.util.Log;
 public class Graphic {
 
     protected Bitmap image;
-    protected RectF hitbox = new RectF();
-    protected PointF dimension = new PointF();
+    protected Rect hitbox = new Rect();
+    protected Point dimension = new Point();
+    protected Point position = new Point();
 
     public Graphic(Bitmap img) {
         image = img;
@@ -25,24 +28,30 @@ public class Graphic {
     public void setSize(int width, int height) {
         dimension.x = width;
         dimension.y = height;
-        image = Bitmap.createScaledBitmap(image, width, height, false);
+        image = Bitmap.createScaledBitmap(image, width, height, true);
+        updateHitbox();
     }
 
 
-    public void setPosition(float x, float y) {
-        hitbox.set(x, y, x + dimension.x, y + dimension.y);
+    public void setPosition(int x, int y) {
+        position.set(x, y);
+        updateHitbox();
+    }
+
+    public void updateHitbox() {
+        hitbox.set(position.x, position.y, position.x + dimension.x, position.y + dimension.y);
     }
 
     public void draw(Canvas c) {
         c.drawBitmap(image, null, hitbox, null);
     }
 
-    public RectF getHitbox()
+    public Rect getHitbox()
     {
         return hitbox;
     }
 
-    public boolean contains(float x, float y) {
+    public boolean contains(int x, int y) {
 
         if(hitbox.contains(x, y)) {
             //so the hitbox contains the pixels, lets make sure that it isn't transparent

@@ -48,7 +48,7 @@ public class Controller {
         arrowLeft.draw(c);
     }
 
-    public void updateDirection(float x, float y) {
+    public void updateDirection(int x, int y) {
         if(arrowUp.contains(x, y)) {
             direction.y = -1;
         } else if(arrowDown.contains(x, y)) {
