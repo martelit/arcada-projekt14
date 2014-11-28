@@ -412,10 +412,10 @@ public class Ball extends GraphicsObject {
                     //Log.v("X & Y speeds before + angle", ""+xSpeedDoubleVersion+" "+ySpeedDoubleVersion+" "+collisionPointsMiddle.get(2));
 
                     //Finally decides the new speed of the ball.
-                    xSpeedDoubleVersion = (0.4)*(-1)*xSpeedDoubleVersion*collisionX;
-                    ySpeedDoubleVersion = (0.4)*(-1)*ySpeedDoubleVersion*collisionY;
-                    //xSpeedDoubleVersion = (0.4+(0.6*Math.abs(Math.sin(Math.toRadians(collisionPointsMiddle.get(2))))))*(-1)*xSpeedDoubleVersion*collisionX;
-                    //ySpeedDoubleVersion = (0.4+(0.6*Math.abs(Math.cos(Math.toRadians(collisionPointsMiddle.get(2))))))*(-1)*ySpeedDoubleVersion*collisionY;
+                    //xSpeedDoubleVersion = (0.4)*(-1)*xSpeedDoubleVersion*collisionX;
+                    //ySpeedDoubleVersion = (0.4)*(-1)*ySpeedDoubleVersion*collisionY;
+                    xSpeedDoubleVersion = (0.4+(0.6*Math.abs(Math.sin(Math.toRadians(collisionPointsMiddle.get(2))))))*(-1)*xSpeedDoubleVersion*collisionX;
+                    ySpeedDoubleVersion = (0.4+(0.6*Math.abs(Math.cos(Math.toRadians(collisionPointsMiddle.get(2))))))*(-1)*ySpeedDoubleVersion*collisionY;
 
                     //Log.v("X & Y (-1 to 1) and speeds after", ""+collisionX+" "+collisionY+" "+xSpeedDoubleVersion+" "+ySpeedDoubleVersion);
 
