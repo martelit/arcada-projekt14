@@ -43,6 +43,9 @@
             android:name="fi.arcada.prog.blindlabyrinth.Settings"
             android:label="@string/title_activity_settings" >
         </activity>
+
+
+        <service android:name="fi.arcada.prog.blindlabyrinth.AudioEngine" />
     </application>
 
 </manifest>

@@ -11,7 +11,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 
-public class Settings extends Activity {
+public class Settings extends GameActivity {
     public static final String PREFS_NAME = "blindLabyrinthPref";
 
     @Override

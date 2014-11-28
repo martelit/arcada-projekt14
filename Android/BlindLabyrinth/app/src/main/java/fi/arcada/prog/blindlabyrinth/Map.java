@@ -23,16 +23,17 @@ public class Map {
     protected Point start = new Point(0, 0);
     protected Point goal = new Point(0, 0);
     protected Rect goalBox = new Rect();
+    protected Rect mapBox = new Rect();
     protected int size;
     protected int maxTokens = 0;
     protected int foundTokens = 0;
 
     int mapPadding = 20; //no idea how to calculate this in a dynamic manner
-    int objectSize; //ie token/goal
+    public int objectSize; //ie token/goal
 
     public Map(Bitmap maskImage, Bitmap skinImage, Bitmap goalImage, Bitmap tokenImage, int mapSize) {
         size = mapSize - (mapPadding * 2);
-        objectSize = size / 30;
+        objectSize = size / 35;
 
         mask = new Graphic(maskImage);
         skin = new Graphic(skinImage);
@@ -40,15 +41,16 @@ public class Map {
         mask.setSize(size, size);
         skin.setSize(size, size);
 
+        mapBox = new Rect(mapPadding, mapPadding, mapSize - mapPadding, mapSize - mapPadding);
+
         parseMask();
     }
 
     public void parseMask() {
         int w = mask.image.getWidth();
-        int h = mask.image.getHeight();
 
         for(int i = 0; i < w; i++) {
-            for(int j = 0; j < h; j++) {
+            for(int j = 0; j < w; j++) {
                 int pixel = mask.image.getPixel(i, j);
 
                 int x = i + mapPadding;
@@ -109,12 +111,16 @@ public class Map {
         goalBox.set(goal.x  - radius, goal.y - radius, goal.x + radius, goal.y + radius);
     }
 
+    public int ballSize() {
+        return objectSize * 2;
+    }
+
     public int startX() {
-        return start.x;
+        return start.x - objectSize / 2;
     }
 
     public int startY() {
-        return start.y;
+        return start.y - objectSize / 2;
     }
 
     public void draw(Canvas c) {
@@ -131,12 +137,16 @@ public class Map {
         gp.setColor(Color.RED);
         c.drawRect(goalBox, gp);
 
+        /*Paint b = new Paint();
+        b.setColor(Color.BLUE);
+        c.drawRect(mapBox, b);
         //Uncomment this to see the collision points (drops framerate to 0, unplayable)
-        /*Paint t = new Paint();
+        Paint t = new Paint();
         t.setColor(Color.RED);
         for(Point p: collisions) {
             c.drawPoint(p.x, p.y, t);
-        }*/
+        }
+*/
     }
 
 }
