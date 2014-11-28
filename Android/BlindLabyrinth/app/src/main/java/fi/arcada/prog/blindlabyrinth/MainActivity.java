@@ -1,20 +1,35 @@
 package fi.arcada.prog.blindlabyrinth;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.graphics.Canvas;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
+
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Handler;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends GameActivity {
+
+    public Timer musicTimer = new Timer();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         // Bind controls to needed actions here, button example -LL
         ((Button) findViewById(R.id.button)).setOnClickListener(new View.OnClickListener() {
@@ -42,8 +57,33 @@ public class MainActivity extends Activity {
             }
         });
 
+        musicTimer.schedule(musicInit, 500, 500);
     }
 
+    private TimerTask musicInit = new TimerTask() {
+        @Override
+        public void run() {
+            if(aeBound) {
+                //Initialize the audio engine
+                HashMap<String, Integer> music = new HashMap<String, Integer>();
+                music.put("music0", R.raw.qcl0);
+                music.put("music1", R.raw.qcl1);
+                music.put("music2", R.raw.qcl2);
+
+
+                HashMap<String, Integer> sounds = new HashMap<String, Integer>();
+                sounds.put("move", R.raw.rollin);
+
+                Audio.init(music, sounds);
+                Audio.playMusic();
+                musicTimer.cancel();
+            }
+        }
+    };
+
+    public void startGame() {
+        Audio.playSound("move", (float)2.0);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -67,16 +107,7 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    // Method for switching to the GameActivity -LL
-    public void startGame() {
-        Intent i = new Intent(getApplicationContext(), GameActivity.class);
 
-        // Optional parameters might be needed, mode/difficulty etc.
-        // Use the following format to pass needed data:
-        // i.putExtra("key", "value");
-
-        startActivity(i);
-    }
     public void startAccelerometer() {
         Intent intent = new Intent(getApplicationContext(), Accelerometer.class);
         startActivity(intent);
