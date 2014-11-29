@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -22,7 +23,10 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.GridView;
+import android.widget.ImageView;
 
 /**
  * Created by rusty on 8.11.2014.
@@ -39,10 +43,12 @@ public class GameView extends View implements Runnable, SensorEventListener {
     boolean DEBUG_CONTROLS = false;
 
     public Bitmap ballBitmap;
+    public Bitmap bmAlpha;
     public Ball ball;
     public Map map;
     public Controller ctrl;
     Paint blackPaint;
+    Paint ptBlur;
     Path ballPath;
     Region region;
     SharedPreferences prefs;
@@ -50,6 +56,8 @@ public class GameView extends View implements Runnable, SensorEventListener {
     String size;
     int multiplierOne;
     int multiplierTwo;
+    boolean glowMode;
+    int[] offsetXY;
 
     //Default values given to a created ball.
     //Free to be changed later on.
@@ -65,6 +73,10 @@ public class GameView extends View implements Runnable, SensorEventListener {
         blackPaint = new Paint();
         ballPath = new Path();
         region = new Region();
+        ptBlur = new Paint();
+
+        ptBlur.setMaskFilter(new BlurMaskFilter(115, BlurMaskFilter.Blur.NORMAL));
+        offsetXY = new int[2];
 
         blackPaint.setColor(Color.BLACK);
 
@@ -90,22 +102,27 @@ public class GameView extends View implements Runnable, SensorEventListener {
         //Selects the visibility depending on what settings have been given.
         if(prefs.getString("gameMode", "nothing").equals("trailblazer")) {
             gameMode = "trailblazer";
+            glowMode = true;
             multiplierOne = 2;
         }
         else if(prefs.getString("gameMode", "nothing").equals("glowstick")) {
             gameMode = "glowstick";
+            glowMode = true;
             multiplierOne = 3;
         }
         else if(prefs.getString("gameMode", "nothing").equals("darkness")) {
             gameMode = "darkness";
+            glowMode = false;
             multiplierOne = 4;
         }
         else if(prefs.getString("gameMode", "nothing").equals("lights_on")) {
             gameMode = "lights_on";
+            glowMode = false;
             multiplierOne = 1;
         }
         else {  //Gives default visibility.
             gameMode = "lights_on";
+            glowMode = false;
             multiplierOne = 1;
         }
 
@@ -169,7 +186,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     //Responsible for creating/launching/resetting everything needed for a new game to begin.
     public void startGame() {
-        ball = new Ball(map.startX(), map.startY(), map.ballSize(), map.ballSize(), Color.BLUE, this, ballXStartSpeed, ballYStartSpeed);
+        ball = new Ball(map.startX(), map.startY(), map.ballSize(), map.ballSize(), Color.BLUE, this, ballXStartSpeed, ballYStartSpeed, glowMode);
         createThreads();
     }
 
@@ -229,8 +246,15 @@ public class GameView extends View implements Runnable, SensorEventListener {
             ctrl.draw(canvas);
         }
 
-        //Draws the ball.
-        canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
+        //Draws the ball with either glow or no glow attached under depending on settings chosen.
+        if(prefs.getString("gameMode", "nothing").equals("trailblazer") || prefs.getString("gameMode", "nothing").equals("glowstick")) {
+            bmAlpha = ballBitmap.extractAlpha(ptBlur, offsetXY);
+            canvas.drawBitmap(bmAlpha, null, ball.getGlowSize(), ball.getGlow());
+            canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
+        }
+        else {
+            canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
+        }
 
         //Decides how much darkness is drawn in addition to the labyrinth and the ball.
         if(gameMode.equals("trailblazer")) {

@@ -16,10 +16,10 @@ import java.util.ArrayList;
 public class Ball extends GraphicsObject {
 
     //Constructor for initializing values given to the ball.
-    public Ball(int ballXStartPosition, int ballYStartPosition, int ballWidth, int ballHeight, int color, GameView view, int BallXStartSpeed, int ballYStartSpeed) {
+    public Ball(int ballXStartPosition, int ballYStartPosition, int ballWidth, int ballHeight, int color, GameView view, int BallXStartSpeed, int ballYStartSpeed, boolean glowMode) {
 
         //Runs the superclass version (in GraphicsObject) of the constructor.
-        super(ballXStartPosition, ballYStartPosition, ballWidth, ballHeight, color, view, BallXStartSpeed, ballYStartSpeed);
+        super(ballXStartPosition, ballYStartPosition, ballWidth, ballHeight, color, view, BallXStartSpeed, ballYStartSpeed, glowMode);
     }
 
     //For checking if the ball has collided with something of interest.
@@ -51,6 +51,9 @@ public class Ball extends GraphicsObject {
 
     public void updateRect() {
         size.set(xPosition, yPosition, xPosition+width, yPosition+height);
+    }
+    public void updateGlow() {
+        glowSize.set(xPosition-(int) (width/0.8), yPosition-(int) (height/0.8), xPosition+width+(int) (width/0.8), yPosition+height+(int) (height/0.8));
     }
     public void handleCollisionTop() {
         Log.d("collision", "top");
@@ -191,8 +194,12 @@ public class Ball extends GraphicsObject {
         }
 
         //The position of the ball is set here, based on what has happened to xPosition and yPosition before.
-        //size.set(xPosition, yPosition, xPosition+width, yPosition+height);
         updateRect();
+
+        //Same for glow if it's on.
+        if(glowMode) {
+            updateGlow();
+        }
     }
 
     //Method to use in conjunction with the acceleration formula to get values for the ball's movement.
@@ -434,5 +441,9 @@ public class Ball extends GraphicsObject {
         preemptiveYDistance = 0;
         collisionPoints.clear();
         collisionPointsMiddle.clear();
+    }
+
+    public void setGlowMode(boolean bool) {
+        glowMode = bool;
     }
 }
