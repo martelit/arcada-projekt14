@@ -23,13 +23,39 @@ import java.util.logging.Handler;
 
 public class MainActivity extends GameActivity {
 
-    public Timer musicTimer = new Timer();
+    private ServiceConnection aeConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            AudioEngine.AudioBinder binder = (AudioEngine.AudioBinder) service;
+            Cache.getInstance().Audio = binder.getService();
+            Cache.getInstance().aeBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Cache.getInstance().aeBound = false;
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (Cache.getInstance().aeBound) {
+            unbindService(aeConnection);
+            Cache.getInstance().aeBound = false;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (!Cache.getInstance().aeBound) {
+            Intent intent = new Intent(this, AudioEngine.class);
+            bindService(intent, aeConnection, Context.BIND_AUTO_CREATE);
+        }
 
         // Bind controls to needed actions here, button example -LL
         ((Button) findViewById(R.id.button)).setOnClickListener(new View.OnClickListener() {
@@ -56,33 +82,11 @@ public class MainActivity extends GameActivity {
                 startSettings();
             }
         });
-
-        musicTimer.schedule(musicInit, 500, 500);
     }
 
-    private TimerTask musicInit = new TimerTask() {
-        @Override
-        public void run() {
-            if(aeBound) {
-                //Initialize the audio engine
-                HashMap<String, Integer> music = new HashMap<String, Integer>();
-                music.put("music0", R.raw.qcl0);
-                music.put("music1", R.raw.qcl1);
-                music.put("music2", R.raw.qcl2);
-
-
-                HashMap<String, Integer> sounds = new HashMap<String, Integer>();
-                sounds.put("move", R.raw.rollin);
-
-                Audio.init(music, sounds);
-                Audio.playMusic();
-                musicTimer.cancel();
-            }
-        }
-    };
 
     public void startGame() {
-        Audio.playSound("move", (float)2.0);
+        //Audio.playSound("move", (float)2.0);
     }
 
     @Override

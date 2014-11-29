@@ -1,14 +1,10 @@
 package fi.arcada.prog.blindlabyrinth;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
-import android.media.AsyncPlayer;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -28,7 +24,6 @@ public class AudioEngine extends Service {
     protected MediaPlayer musicPlayer = new MediaPlayer();
     protected SoundPool soundPlayer;
     protected float soundVolume = (float) 1.0;
-
 
     protected HashMap<String, Integer> sounds = new HashMap<String, Integer>();
     protected HashMap<String, Integer> music;
@@ -51,19 +46,45 @@ public class AudioEngine extends Service {
         musicPlayer = null;
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY;
+    }
+
+
+    public AudioEngine() {
+        HashMap<String, Integer> music = new HashMap<String, Integer>();
+        music.put("music0", R.raw.qcl1);
+        music.put("music1", R.raw.qcl0);
+        music.put("music2", R.raw.qcl2);
+
+
+        HashMap<String, Integer> sounds = new HashMap<String, Integer>();
+        sounds.put("move", R.raw.rollin);
+
+        init(music, sounds);
+        playMusic();
+    }
+
     public void init(HashMap<String, Integer> musicRes, HashMap<String, Integer> soundRes) {
         soundPlayer = new SoundPool(soundRes.size(), AudioManager.STREAM_MUSIC, 0);
         setMusicVolume((float)0.8);
         for (Map.Entry<String, Integer> entry : soundRes.entrySet()) {
-            Log.v(entry.getKey(), Integer.toString(entry.getValue()));
-            int id = soundPlayer.load(this, entry.getValue(), 1);
+            int id = soundPlayer.load(App.getContext(), entry.getValue(), 1);
             sounds.put(entry.getKey(), id);
         }
 
         music = musicRes;
 
         resetIterator();
+    }
 
+    public void onPause() {
+        if(musicPlayer != null) musicPlayer.pause();
+    }
+
+    public void onPlay() {
+        if(musicPlayer != null) musicPlayer.start();
     }
 
     public void setMusicVolume(float vol) {
@@ -83,7 +104,7 @@ public class AudioEngine extends Service {
         if(id != 0) {
             musicPlayer.stop();
             musicPlayer.release();
-            musicPlayer = musicPlayer.create(this, id);
+            musicPlayer = musicPlayer.create(App.getContext(), id);
             musicPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {

@@ -2,52 +2,40 @@ package fi.arcada.prog.blindlabyrinth;
 
 
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.graphics.Canvas;
-import android.os.IBinder;
+import android.os.Handler;
 import android.util.Log;
-
-import java.util.HashMap;
 
 
 public class GameActivity extends Activity {
 
-    public AudioEngine Audio;
-    public boolean aeBound = false;
-
-    private ServiceConnection aeConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            AudioEngine.AudioBinder binder = (AudioEngine.AudioBinder) service;
-            Audio = binder.getService();
-            aeBound = true;
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            aeBound = false;
-        }
-    };
+    final Handler handler = new Handler();
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        // Bind to LocalService
-        Intent intent = new Intent(this, AudioEngine.class);
-        bindService(intent, aeConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Unbind from the service
-        if (aeBound) {
-            unbindService(aeConnection);
+    protected void onResume() {
+        super.onResume();
+        Log.v(this.getClass().toString(), "resume");
+        Cache.getInstance().inFocus = true;
+        if (Cache.getInstance().aeBound) {
+            Cache.getInstance().Audio.onPlay();
         }
     }
+
+    protected void onPause() {
+        super.onPause();
+        Log.v(this.getClass().toString(), "pause");
+        Cache.getInstance().inFocus = false;
+        if (Cache.getInstance().aeBound) {
+
+            //Delay the pausing of the music by 0.1s too see if we are just switching GameActivity
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(!Cache.getInstance().inFocus) {
+                        Cache.getInstance().Audio.onPause();
+                    }
+                }
+            }, 100);
+        }
+    }
+
 }
