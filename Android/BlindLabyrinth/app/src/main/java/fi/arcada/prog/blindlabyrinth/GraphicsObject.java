@@ -21,7 +21,6 @@ public class GraphicsObject {
     protected int width, height;
     protected Paint color;
     protected Paint glow;
-    BlurMaskFilter blurMaskFilter;
     protected GameView view;
     protected int xSpeed, ySpeed;
 
@@ -32,7 +31,6 @@ public class GraphicsObject {
     protected double friction;
     protected double accelerationX, accelerationY;
     protected double xSpeedDoubleVersion, ySpeedDoubleVersion;
-    protected double xSpeedDoubleVersionTempOldValue, ySpeedDoubleVersionTempOldValue;
     protected double xDistanceImaginary, yDistanceImaginary;
     protected double preemptiveXSpeed, preemptiveYSpeed;
     protected double preemptiveXDistance, preemptiveYDistance;
@@ -43,6 +41,36 @@ public class GraphicsObject {
     protected ArrayList<Double> speedAndLeftoverDecimal;
 
     protected boolean glowMode;
+
+    //Variables for preemptiveCollisionCheck. Probably only a temporary storing place.
+    boolean collisionsStarted;
+    boolean collisionsEnded;
+    ArrayList<ArrayList<Integer>> collisionPoints;
+    ArrayList<Integer> collisionPointsMiddle;
+    double totalCollisions;
+    int y2;
+    int x2;
+    int y1;
+    int x1;
+    double k1;
+    double k2;
+    double speedVectorLength;
+    double tanAlpha;
+    double tanAlpha2;
+    double tanAlpha3;
+    double tanAlpha4;
+    double collisionPointReverseAngle;
+    double testAngle;
+    double xTest;
+    double yTest;
+    double kTest;
+
+    //Variables for getNewSpeedVectorXAndY. Probably only a temporary storing place.
+    ArrayList<Double> xAndY;
+    double baseVector;
+    double multiplier;
+    double xTotal;
+    double yTotal;
 
     //Constructor designed for usage when an object of Ball is created.
     //Initializes values.
@@ -57,6 +85,10 @@ public class GraphicsObject {
         xSpeed = BallXStartSpeed;
         ySpeed = BallYStartSpeed;
         this.glowMode = glowMode;
+
+        //Checks if width and height are even and changes them to odd if they are (odd numbers work better with formulas since they have a true middle point in pixels)
+        if ( (width & 1) == 0 ) width--;
+        if ( (height & 1) == 0 ) height --;
 
         //Creates a rectangle from the given data, serving as the location data of the ball + how big it is.
         size = new RectF();
