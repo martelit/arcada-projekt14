@@ -31,7 +31,23 @@
 
         </script>
 		
-		
+		<script src="js/engine.js"></script>
+		<script>
+		//Store the values of the radio buttons into global variables
+		function storeValues() {
+			$('input[name="radioSize"]').change(function(){
+			labyrinthSize = this.value
+			})
+			//Alert to check global variable
+			alert (labyrinthSize);
+			
+			$('input[name="radioMode"]').change(function(){
+			labyrinthMode = this.value
+			})
+			//Alert to check global variable
+			alert (labyrinthMode);
+		};
+		</script>
 		
         <title>Blind Labyrint</title>
     </head>
@@ -67,34 +83,39 @@
 			<div data-role="fieldcontain">
 			<fieldset data-role="controlgroup">
 			<legend>Choose labyrinth size:</legend>
-     	<input type="radio" name="radio-choice" id="radio-choice-1" value="choice-1" checked="checked" />
-     	<label for="radio-choice-1">Small</label>
+		
+		
+     	<input type="radio" name="radioSize" id="radioSize-1" value="small" checked="checked" />
+     	<label for="radioSize-1">Small</label>
 
-     	<input type="radio" name="radio-choice" id="radio-choice-2" value="choice-2"  />
-     	<label for="radio-choice-2">Medium</label>
+     	<input type="radio" name="radioSize" id="radioSize-2" value="medium"  />
+     	<label for="radioSize-2">Medium</label>
 
-     	<input type="radio" name="radio-choice" id="radio-choice-3" value="choice-3"  />
-     	<label for="radio-choice-3">Big</label>
-
+     	<input type="radio" name="radioSize" id="radioSize-3" value="big"  />
+     	<label for="radioSize-3">Big</label>
+		
+<!-- 
      	<input type="radio" name="radio-choice" id="radio-choice-4" value="choice-4"  />
      	<label for="radio-choice-4">Very big</label>
+-->
 </fieldset>
 
 <fieldset data-role="controlgroup">
 			<legend>Choose labyrinth effect:</legend>
-     	<input type="radio" name="radio-choice" id="radio-choice-1" value="choice-1" checked="checked" />
-     	<label for="radio-choice-1">Fully visible</label>
+			
+     	<input type="radio" name="radioMode" id="radioMode-1" value="visible" checked="checked" />
+     	<label for="radioMode-1">Fully visible</label>
 
-     	<input type="radio" name="radio-choice" id="radio-choice-2" value="choice-2"  />
-     	<label for="radio-choice-2">Ball leaves trace</label>
+     	<input type="radio" name="radioMode" id="radioMode-2" value="trace"  />
+     	<label for="radioMode-2">Ball leaves trace</label>
 
-     	<input type="radio" name="radio-choice" id="radio-choice-3" value="choice-3"  />
-     	<label for="radio-choice-3">Glowing ball</label>
+     	<input type="radio" name="radioMode" id="radioMode-3" value="glowing"  />
+     	<label for="radioMode-3">Glowing ball</label>
 
 </fieldset>
 			</div>
  
-<a href="#pageone"><input type="button" name="submit" value="Apply settings" onclick="#" /></a>
+<a href="#pageone"><input type="button" name="submit" value="Apply settings" onclick="storeValues()" /></a>
  
 </form>
   </div>
