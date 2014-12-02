@@ -86,7 +86,7 @@ public class MainActivity extends GameActivity {
 
 
     public void startGame() {
-        //Audio.playSound("move", (float)2.0);
+        Cache.getInstance().Audio.playSound("move", (float)2.0);
     }
 
     @Override

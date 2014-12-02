@@ -55,8 +55,8 @@ public class AudioEngine extends Service {
     public AudioEngine() {
         HashMap<String, Integer> music = new HashMap<String, Integer>();
         music.put("music0", R.raw.qcl1);
-        music.put("music1", R.raw.qcl0);
-        music.put("music2", R.raw.qcl2);
+        music.put("music1", R.raw.qcl2);
+        music.put("music2", R.raw.qcl0);
 
 
         HashMap<String, Integer> sounds = new HashMap<String, Integer>();

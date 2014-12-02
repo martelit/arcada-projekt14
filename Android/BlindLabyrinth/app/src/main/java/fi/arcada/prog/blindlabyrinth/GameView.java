@@ -1,6 +1,8 @@
 package fi.arcada.prog.blindlabyrinth;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 /**
  * Created by rusty on 8.11.2014.
@@ -224,11 +227,18 @@ public class GameView extends View implements Runnable, SensorEventListener {
             editor.putInt("score", prefs.getInt("score", 0) + (multiplierOne * multiplierTwo));
             editor.commit();
 
+            Toast.makeText(App.getContext(), "You've reached the goal, congratz...", Toast.LENGTH_SHORT).show();
+            Activity gvb = (Activity) getContext();
+            gvb.finish();
+
             Log.v("END", "The ball is in the goal");
         }
 
         if(map.findsToken(ball.getPosition())) {
             //Yay, we found a token, add the counter graphics and play a sound
+            String tokenText =  "Token #" + Integer.toString(map.foundTokens)  + " found";
+            if(map.foundTokens == map.maxTokens) tokenText += ". You've found all tokens.";
+            Toast.makeText(App.getContext(), tokenText, Toast.LENGTH_SHORT).show();
             Log.v("TOKEN", "Token found");
         }
 

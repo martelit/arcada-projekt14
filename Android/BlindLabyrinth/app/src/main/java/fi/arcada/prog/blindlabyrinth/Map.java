@@ -90,7 +90,9 @@ public class Map {
     }
 
     public boolean isCompleted(Point pos) {
-        return goalBox.contains(pos.x, pos.y);
+        boolean value = goalBox.contains(pos.x, pos.y);
+        if(value) goalBox = new Rect();
+        return value;
     }
 
     public boolean findsToken(Point pos) {
