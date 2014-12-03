@@ -17,12 +17,13 @@ public class Graphic {
     protected Rect hitbox = new Rect();
     protected Point dimension = new Point();
     protected Point position = new Point();
+    public boolean visible = true;
 
     public Graphic(Bitmap img) {
         image = img;
         dimension.x = image.getWidth();
         dimension.y = image.getHeight();
-        setPosition(20, 20);
+        setPosition(0, 0);
     }
 
     public void setSize(int width, int height) {
@@ -43,7 +44,7 @@ public class Graphic {
     }
 
     public void draw(Canvas c) {
-        c.drawBitmap(image, null, hitbox, null);
+        if(visible) c.drawBitmap(image, null, hitbox, null);
     }
 
     public Rect getHitbox()

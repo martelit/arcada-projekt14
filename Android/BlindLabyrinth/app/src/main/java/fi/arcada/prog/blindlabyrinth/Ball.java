@@ -101,6 +101,9 @@ public class Ball extends GraphicsObject {
         accelerationX = ((double) acceleratorX)*(-1.0);   //Movement in the x-axis seemed to be reverse of what was needed, so the value is now taken times minus one.
         accelerationY = (double) acceleratorY;
 
+        //Log.v("speed", Double.toString(accelerationY + accelerationX));
+
+
         //Ignores minor acceleration values given by the accelerometer.
         //The idea is to remove drawn out lingering movement when a phone is for example left on a table.
         if(accelerationX <= 0.5 && accelerationX >= -0.5){

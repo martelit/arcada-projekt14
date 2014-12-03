@@ -152,15 +152,34 @@ public class GameView extends View implements Runnable, SensorEventListener {
         //images used for background and bitmaps are stored in app/src/main/java/res/drawable
         //this.setBackgroundResource(R.drawable.nameOfChosenLabyrinthBackgroundForGameScreen);
         //ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 2;
 
-        Bitmap map1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.mask1);
+        Bitmap mask = null;
+        Bitmap skin = null;
+        Bitmap goal = BitmapFactory.decodeResource(context.getResources(), R.drawable.goal);
+        Bitmap token = BitmapFactory.decodeResource(context.getResources(), R.drawable.token);
+        int mode = 0; // 1 = small, 2 = medium, 3 = large
+        if(prefs.getString("size", "small").equals("small")) {
+            mask = BitmapFactory.decodeResource(context.getResources(), R.drawable.s1_m, options);
+            skin = BitmapFactory.decodeResource(context.getResources(), R.drawable.s1_s, options);
+            mode = 1;
+        } else if(prefs.getString("size", "").equals("medium")) {
+            mask = BitmapFactory.decodeResource(context.getResources(), R.drawable.m1_m, options);
+            skin = BitmapFactory.decodeResource(context.getResources(), R.drawable.m1_s, options);
+            mode = 2;
+        } else if(prefs.getString("size", "").equals("large")) {
+            mask = BitmapFactory.decodeResource(context.getResources(), R.drawable.l1_m, options);
+            skin = BitmapFactory.decodeResource(context.getResources(), R.drawable.l1_s, options);
+            mode = 3;
+        }
 
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
         Point displaySize = new Point();
         display.getSize(displaySize);
 
-        map = new Map(map1, map1, map1, map1, displaySize.x);
+        map = new Map(mask, skin, goal, token, displaySize.x, mode);
 
         //This line has been somewhat changed so it can be used in GameView (context added before a few things).
         sensorManager=(SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
