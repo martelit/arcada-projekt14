@@ -102,19 +102,19 @@
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ball 1"
+                android:text="Blue"
                 android:id="@+id/ball1" />
 
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ball 2"
+                android:text="Earth"
                 android:id="@+id/ball2" />
 
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ball 3"
+                android:text="Green"
                 android:id="@+id/ball3" />
 
             <RadioButton
