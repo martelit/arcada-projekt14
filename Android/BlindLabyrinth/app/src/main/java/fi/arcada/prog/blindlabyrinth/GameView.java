@@ -15,8 +15,10 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.RadialGradient;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.Shader;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -43,7 +45,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
     float acceleratorY = 0;
     float acceleratorZ = 0;
 
-    boolean DEBUG_CONTROLS = false;
+    boolean DEBUG_CONTROLS = true;
 
     public Bitmap ballBitmap;
     public Bitmap bmAlpha;
@@ -59,7 +61,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
     String size;
     int multiplierOne;
     int multiplierTwo;
-    boolean glowMode;
+    boolean gradientMode;
     int[] offsetXY;
 
     //Default values given to a created ball.
@@ -105,27 +107,27 @@ public class GameView extends View implements Runnable, SensorEventListener {
         //Selects the visibility depending on what settings have been given.
         if(prefs.getString("gameMode", "nothing").equals("trailblazer")) {
             gameMode = "trailblazer";
-            glowMode = true;
+            gradientMode = true;
             multiplierOne = 2;
         }
         else if(prefs.getString("gameMode", "nothing").equals("glowstick")) {
             gameMode = "glowstick";
-            glowMode = true;
+            gradientMode = true;
             multiplierOne = 3;
         }
         else if(prefs.getString("gameMode", "nothing").equals("darkness")) {
             gameMode = "darkness";
-            glowMode = false;
+            gradientMode = false;
             multiplierOne = 4;
         }
         else if(prefs.getString("gameMode", "nothing").equals("lights_on")) {
             gameMode = "lights_on";
-            glowMode = false;
+            gradientMode = false;
             multiplierOne = 1;
         }
         else {  //Gives default visibility.
             gameMode = "lights_on";
-            glowMode = false;
+            gradientMode = false;
             multiplierOne = 1;
         }
 
@@ -208,8 +210,21 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     //Responsible for creating/launching/resetting everything needed for a new game to begin.
     public void startGame() {
-        ball = new Ball(map.startX(), map.startY(), map.ballSize(), map.ballSize(), Color.BLUE, this, ballXStartSpeed, ballYStartSpeed, glowMode);
+        ball = new Ball(map.startX(), map.startY(), map.ballSize(), map.ballSize(), Color.BLUE, this, ballXStartSpeed, ballYStartSpeed, gradientMode);
+        setGradientMode();
         createThreads();
+    }
+
+    //Sets a few things to right values if trailblazer or glowstick is chosen as mode.
+    private void setGradientMode() {
+        if(gameMode.equals("trailblazer")) {
+            ball.setGradientFadeLengthTrailblazer();
+            ball.setGradientFadeColorTrailblazer();
+        }
+        else if(gameMode.equals("glowstick")) {
+            ball.setGradientFadeLengthGlowstick();
+            ball.setGradientFadeColorGlowstick();
+        }
     }
 
     //Creates and launches a thread that refreshes the game screen every x amount of time.
@@ -240,6 +255,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
     //In other words code for what happens every counted frame during a game.
     protected void onDraw(Canvas canvas)
     {
+
         if(map.isCompleted(ball.getPosition())) {
             //Hooray, move to another screen or something... This is the "End event trigger"
             SharedPreferences.Editor editor = prefs.edit();
@@ -261,11 +277,6 @@ public class GameView extends View implements Runnable, SensorEventListener {
             Log.v("TOKEN", "Token found");
         }
 
-        /*if(map.checkCollision(ball.getTop())) ball.handleCollisionTop();
-        else if(map.checkCollision(ball.getBottom())) ball.handleCollisionBottom();
-        if(map.checkCollision(ball.getRight())) ball.handleCollisionRight();
-        else if(map.checkCollision(ball.getLeft())) ball.handleCollisionLeft();*/
-
         map.draw(canvas);
         if(!DEBUG_CONTROLS) {
             ball.move(acceleratorX, acceleratorY, map);
@@ -276,9 +287,8 @@ public class GameView extends View implements Runnable, SensorEventListener {
         }
 
         //Draws the ball with either glow or no glow attached under depending on settings chosen.
-        if(prefs.getString("gameMode", "nothing").equals("trailblazer") || prefs.getString("gameMode", "nothing").equals("glowstick")) {
-            bmAlpha = ballBitmap.extractAlpha(ptBlur, offsetXY);
-            canvas.drawBitmap(bmAlpha, null, ball.getGlowSize(), ball.getGlow());
+        if(ball.gradientMode) {
+            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), ball.getGradient());
             canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
         }
         else {
@@ -294,7 +304,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
             ballPath = region.getBoundaryPath();
 
             //Makes a path in the form of a circle around the ball, which will be used as an excluded part when drawing the black rectangle filling the screen.
-            ballPath.addCircle(ball.getPosition().x+ball.width/2, ball.getPosition().y+ball.height/2, ball.width/2+ball.width, Path.Direction.CW);
+            ballPath.addCircle(ball.getPosition().x+ball.midPointLength, ball.getPosition().y+ball.midPointLength, ball.midPointLength+ball.width*2, Path.Direction.CW);
 
             //This is the line that makes so the path isn't involved as a part of the black rectangle.
             canvas.clipPath(ballPath, Region.Op.DIFFERENCE);
@@ -303,18 +313,24 @@ public class GameView extends View implements Runnable, SensorEventListener {
             canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
         }
         else if(gameMode.equals("glowstick")) {
-            ballPath.addCircle(ball.getPosition().x+ball.width/2, ball.getPosition().y+ball.height/2, ball.width/2+ball.width, Path.Direction.CW);
-            canvas.clipPath(ballPath, Region.Op.DIFFERENCE);
-            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
+            //As of the latest solution nothing needs to be done here. Saving code for now in case of reverting to old model.
+
+            //ballPath.addCircle(ball.getPosition().x+ball.width/2, ball.getPosition().y+ball.height/2, ball.midPointLength+ball.width, Path.Direction.CW);
+            //canvas.clipPath(ballPath, Region.Op.DIFFERENCE);
+            //canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
 
             //Resets the path, since it shouldn't leave a trail behind in this mode and even if it should, adding new circles to a path for every little movement of the ball is a huge performance issue.
-            ballPath.rewind();
+            //ballPath.rewind();
         }
         else if(gameMode.equals("darkness")) {
             canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
         }
         else if(gameMode.equals("lights_on")) {
             //Nothing really needs to be done here, at least not for now.
+        }
+
+        if(DEBUG_CONTROLS) {
+            ctrl.draw(canvas);
         }
     }
 

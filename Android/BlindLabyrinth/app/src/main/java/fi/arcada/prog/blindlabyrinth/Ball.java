@@ -16,10 +16,10 @@ import java.util.ArrayList;
 public class Ball extends GraphicsObject {
 
     //Constructor for initializing values given to the ball.
-    public Ball(int ballXStartPosition, int ballYStartPosition, int ballWidth, int ballHeight, int color, GameView view, int BallXStartSpeed, int ballYStartSpeed, boolean glowMode) {
+    public Ball(int ballXStartPosition, int ballYStartPosition, int ballWidth, int ballHeight, int color, GameView view, int BallXStartSpeed, int ballYStartSpeed, boolean gradientMode) {
 
         //Runs the superclass version (in GraphicsObject) of the constructor.
-        super(ballXStartPosition, ballYStartPosition, ballWidth, ballHeight, color, view, BallXStartSpeed, ballYStartSpeed, glowMode);
+        super(ballXStartPosition, ballYStartPosition, ballWidth, ballHeight, color, view, BallXStartSpeed, ballYStartSpeed, gradientMode);
     }
 
     //For checking if the ball has collided with something of interest.
@@ -31,10 +31,6 @@ public class Ball extends GraphicsObject {
         if(xPosition > view.getWidth()-width && xSpeed > 0) xSpeedDoubleVersion *= -0.4;
         if(yPosition < 0 && ySpeed < 0) ySpeedDoubleVersion *= -0.4;
         if(yPosition > view.getHeight()-height && ySpeed > 0) ySpeedDoubleVersion *= -0.4;
-    }
-
-    public Point getPosition() {
-        return new Point(xPosition, yPosition);
     }
 
     public Point getTop() {
@@ -53,8 +49,8 @@ public class Ball extends GraphicsObject {
     public void updateRect() {
         size.set(xPosition, yPosition, xPosition+width, yPosition+height);
     }
-    public void updateGlow() {
-        glowSize.set(xPosition-(int) (width/0.8), yPosition-(int) (height/0.8), xPosition+width+(int) (width/0.8), yPosition+height+(int) (height/0.8));
+    public void updateGradient() {
+
     }
     public void handleCollisionTop() {
         Log.d("collision", "top");
@@ -201,8 +197,8 @@ public class Ball extends GraphicsObject {
         updateRect();
 
         //Same for glow if it's on.
-        if(glowMode) {
-            updateGlow();
+        if(gradientMode) {
+            setGradientShader();
         }
     }
 
@@ -558,6 +554,6 @@ public class Ball extends GraphicsObject {
 
     //Not used right now. Changes glowMode in-game if needed for some reason.
     public void setGlowMode(boolean bool) {
-        glowMode = bool;
+        gradientMode = bool;
     }
 }
