@@ -2,35 +2,25 @@ package fi.arcada.prog.blindlabyrinth;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
-import android.graphics.PointF;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.RadialGradient;
-import android.graphics.Rect;
 import android.graphics.Region;
-import android.graphics.Shader;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.MotionEvent;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 /**
@@ -45,7 +35,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
     float acceleratorY = 0;
     float acceleratorZ = 0;
 
-    boolean DEBUG_CONTROLS = true;
+    boolean DEBUG_CONTROLS = false;
 
     public Bitmap ballBitmap;
     public Bitmap bmAlpha;
@@ -53,7 +43,6 @@ public class GameView extends View implements Runnable, SensorEventListener {
     public Map map;
     public Controller ctrl;
     Paint blackPaint;
-    Paint ptBlur;
     Path ballPath;
     Region region;
     SharedPreferences prefs;
@@ -62,7 +51,8 @@ public class GameView extends View implements Runnable, SensorEventListener {
     int multiplierOne;
     int multiplierTwo;
     boolean gradientMode;
-    int[] offsetXY;
+    boolean countdownHasNotFinished;
+    boolean countdownIsNotCreated;
 
     //Default values given to a created ball.
     //Free to be changed later on.
@@ -78,12 +68,11 @@ public class GameView extends View implements Runnable, SensorEventListener {
         blackPaint = new Paint();
         ballPath = new Path();
         region = new Region();
-        ptBlur = new Paint();
-
-        ptBlur.setMaskFilter(new BlurMaskFilter(115, BlurMaskFilter.Blur.NORMAL));
-        offsetXY = new int[2];
 
         blackPaint.setColor(Color.BLACK);
+
+        countdownHasNotFinished = true;
+        countdownIsNotCreated = true;
 
         //Information about settings are stored in a SharedPreferences file called "blindLabyrinthPref".
         prefs = context.getSharedPreferences("blindLabyrinthPref", 0);
@@ -255,83 +244,117 @@ public class GameView extends View implements Runnable, SensorEventListener {
     //In other words code for what happens every counted frame during a game.
     protected void onDraw(Canvas canvas)
     {
+        if(gameMode.equals("darkness") && countdownHasNotFinished) {    //Runs during the countdown of darkness mode.
+            if(countdownIsNotCreated) {
+                new CountDownTimer(3500, 1000) {
 
-        if(map.isCompleted(ball.getPosition())) {
-            //Hooray, move to another screen or something... This is the "End event trigger"
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putInt("score", prefs.getInt("score", 0) + (multiplierOne * multiplierTwo));
-            editor.commit();
+                    public void onTick(long millisUntilFinished) {
+                        if(millisUntilFinished == 3000) {
 
-            Toast.makeText(App.getContext(), "You've reached the goal, congratz...", Toast.LENGTH_SHORT).show();
-            Activity gvb = (Activity) getContext();
-            gvb.finish();
+                        }
+                        else if(millisUntilFinished == 2000) {
 
-            Log.v("END", "The ball is in the goal");
-        }
+                        }
+                        else if(millisUntilFinished == 1000) {
 
-        if(map.findsToken(ball.getPosition())) {
-            //Yay, we found a token, add the counter graphics and play a sound
-            String tokenText =  "Token #" + Integer.toString(map.foundTokens)  + " found";
-            if(map.foundTokens == map.maxTokens) tokenText += ". You've found all tokens.";
-            Toast.makeText(App.getContext(), tokenText, Toast.LENGTH_SHORT).show();
-            Log.v("TOKEN", "Token found");
-        }
+                        }
+                        else if(millisUntilFinished == 1) {
 
-        map.draw(canvas);
-        if(!DEBUG_CONTROLS) {
-            ball.move(acceleratorX, acceleratorY, map);
-        } else {
-            Point d = ctrl.getDirection();
-            ball.move(d.x * 14, d.y * 14, map);
-            ctrl.draw(canvas);
-        }
+                        }
+                    }
 
-        //Draws the ball with either glow or no glow attached under depending on settings chosen.
-        if(ball.gradientMode) {
-            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), ball.getGradient());
+                    public void onFinish() {
+                        countdownHasNotFinished = false;
+                    }
+                }.start();
+
+                countdownIsNotCreated = false;
+            }
+
+            map.draw(canvas);
             canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
+
         }
-        else {
-            canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
+        else {  //Runs normally when countdown is done in darkness mode.
+            if(map.isCompleted(ball.getPosition())) {
+                //Hooray, move to another screen or something... This is the "End event trigger"
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putInt("score", prefs.getInt("score", 0) + (multiplierOne * multiplierTwo));
+                editor.commit();
+
+                Toast.makeText(App.getContext(), "You've reached the goal, congratz...", Toast.LENGTH_SHORT).show();
+                Activity gvb = (Activity) getContext();
+                gvb.finish();
+
+                Log.v("END", "The ball is in the goal");
+            }
+
+            if(map.findsToken(ball.getPosition())) {
+                //Yay, we found a token, add the counter graphics and play a sound
+                String tokenText =  "Token #" + Integer.toString(map.foundTokens)  + " found";
+                if(map.foundTokens == map.maxTokens) tokenText += ". You've found all tokens.";
+                Toast.makeText(App.getContext(), tokenText, Toast.LENGTH_SHORT).show();
+                Log.v("TOKEN", "Token found");
+            }
+
+            map.draw(canvas);
+            if(!DEBUG_CONTROLS) {
+                ball.move(acceleratorX, acceleratorY, map);
+            } else {
+                Point d = ctrl.getDirection();
+                ball.move(d.x * 14, d.y * 14, map);
+                ctrl.draw(canvas);
+            }
+
+            //Draws the ball with either glow or no glow attached under depending on settings chosen.
+            if(ball.gradientMode) {
+                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), ball.getGradient());
+                canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
+            }
+            else {
+                canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
+            }
+
+            //Decides how much darkness is drawn in addition to the labyrinth and the ball.
+            if(gameMode.equals("trailblazer")) {
+                //Set the current path for ball as region.
+                region.setPath(ballPath, new Region(0, 0, canvas.getWidth(), canvas.getHeight()));
+
+                //Then put the region to ballPath (looks a bit clumsy and there probably is a better way of doing this, but at least it works and doesn't have big performance issues).
+                ballPath = region.getBoundaryPath();
+
+                //Makes a path in the form of a circle around the ball, which will be used as an excluded part when drawing the black rectangle filling the screen.
+                ballPath.addCircle(ball.getPosition().x+ball.midPointLength, ball.getPosition().y+ball.midPointLength, ball.midPointLength+ball.width*2, Path.Direction.CW);
+
+                //This is the line that makes so the path isn't involved as a part of the black rectangle.
+                canvas.clipPath(ballPath, Region.Op.DIFFERENCE);
+
+                //Fills the entire screen with a black rectangle.
+                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
+            }
+            else if(gameMode.equals("glowstick")) {
+                //As of the latest solution nothing needs to be done here. Saving code for now in case of reverting to old model.
+
+                //ballPath.addCircle(ball.getPosition().x+ball.width/2, ball.getPosition().y+ball.height/2, ball.midPointLength+ball.width, Path.Direction.CW);
+                //canvas.clipPath(ballPath, Region.Op.DIFFERENCE);
+                //canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
+
+                //Resets the path, since it shouldn't leave a trail behind in this mode and even if it should, adding new circles to a path for every little movement of the ball is a huge performance issue.
+                //ballPath.rewind();
+            }
+            else if(gameMode.equals("darkness")) {
+                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
+            }
+            else if(gameMode.equals("lights_on")) {
+                //Nothing really needs to be done here, at least not for now.
+            }
+
+            if(DEBUG_CONTROLS) {
+                ctrl.draw(canvas);
+            }
         }
 
-        //Decides how much darkness is drawn in addition to the labyrinth and the ball.
-        if(gameMode.equals("trailblazer")) {
-            //Set the current path for ball as region.
-            region.setPath(ballPath, new Region(0, 0, canvas.getWidth(), canvas.getHeight()));
 
-            //Then put the region to ballPath (looks a bit clumsy and there probably is a better way of doing this, but at least it works and doesn't have big performance issues).
-            ballPath = region.getBoundaryPath();
-
-            //Makes a path in the form of a circle around the ball, which will be used as an excluded part when drawing the black rectangle filling the screen.
-            ballPath.addCircle(ball.getPosition().x+ball.midPointLength, ball.getPosition().y+ball.midPointLength, ball.midPointLength+ball.width*2, Path.Direction.CW);
-
-            //This is the line that makes so the path isn't involved as a part of the black rectangle.
-            canvas.clipPath(ballPath, Region.Op.DIFFERENCE);
-
-            //Fills the entire screen with a black rectangle.
-            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
-        }
-        else if(gameMode.equals("glowstick")) {
-            //As of the latest solution nothing needs to be done here. Saving code for now in case of reverting to old model.
-
-            //ballPath.addCircle(ball.getPosition().x+ball.width/2, ball.getPosition().y+ball.height/2, ball.midPointLength+ball.width, Path.Direction.CW);
-            //canvas.clipPath(ballPath, Region.Op.DIFFERENCE);
-            //canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
-
-            //Resets the path, since it shouldn't leave a trail behind in this mode and even if it should, adding new circles to a path for every little movement of the ball is a huge performance issue.
-            //ballPath.rewind();
-        }
-        else if(gameMode.equals("darkness")) {
-            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
-        }
-        else if(gameMode.equals("lights_on")) {
-            //Nothing really needs to be done here, at least not for now.
-        }
-
-        if(DEBUG_CONTROLS) {
-            ctrl.draw(canvas);
-        }
     }
 
     @Override
