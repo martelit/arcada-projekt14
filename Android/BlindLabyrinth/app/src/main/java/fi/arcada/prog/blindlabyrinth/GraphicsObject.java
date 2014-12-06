@@ -160,7 +160,7 @@ public class GraphicsObject {
     }
 
     public void setGradientFadeLengthGlowstick() {
-        gradientFadeLength = midPointLength+width*2;
+        gradientFadeLength = (int) (midPointLength+width*2.2);
     }
 
     public void setGradientFadeColorTrailblazer() {

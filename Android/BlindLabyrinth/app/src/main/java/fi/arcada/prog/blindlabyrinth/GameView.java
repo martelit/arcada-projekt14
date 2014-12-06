@@ -23,6 +23,8 @@ import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 /**
  * Created by rusty on 8.11.2014.
  */
@@ -35,7 +37,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
     float acceleratorY = 0;
     float acceleratorZ = 0;
 
-    boolean DEBUG_CONTROLS = false;
+    boolean DEBUG_CONTROLS = true;
 
     public Bitmap ballBitmap;
     public Bitmap bmAlpha;
@@ -44,6 +46,8 @@ public class GameView extends View implements Runnable, SensorEventListener {
     public Controller ctrl;
     Paint blackPaint;
     Path ballPath;
+    Path tokensPath;
+    ArrayList<Path> tokensPathList;
     Region region;
     SharedPreferences prefs;
     String gameMode;
@@ -67,6 +71,8 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
         blackPaint = new Paint();
         ballPath = new Path();
+        tokensPath = new Path();
+        tokensPathList = new ArrayList<Path>();
         region = new Region();
 
         blackPaint.setColor(Color.BLACK);
@@ -291,6 +297,30 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
             if(map.findsToken(ball.getPosition())) {
                 //Yay, we found a token, add the counter graphics and play a sound
+
+                tokensPathList.add(new Path(){{
+                    addCircle(ball.getPosition().x+ball.midPointLength, ball.getPosition().y+ball.midPointLength, ball.midPointLength+ball.width*4, Path.Direction.CW);
+                }});
+
+                new CountDownTimer(10000, 1000) {
+
+                    public void onTick(long millisUntilFinished) {
+
+                    }
+
+                    public void onFinish() {
+                        if(!tokensPathList.isEmpty()) {
+                            for (int a = 0; a < tokensPathList.size(); a++) {
+                                if(!(tokensPathList.get(a) == null)) {
+                                    tokensPathList.remove(a);
+                                    break;
+                                }
+                            }
+
+                        }
+                    }
+                }.start();
+
                 String tokenText =  "Token #" + Integer.toString(map.foundTokens)  + " found";
                 if(map.foundTokens == map.maxTokens) tokenText += ". You've found all tokens.";
                 Toast.makeText(App.getContext(), tokenText, Toast.LENGTH_SHORT).show();
@@ -331,6 +361,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
                 //Fills the entire screen with a black rectangle.
                 canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
+
             }
             else if(gameMode.equals("glowstick")) {
                 //As of the latest solution nothing needs to be done here. Saving code for now in case of reverting to old model.
@@ -343,6 +374,20 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 //ballPath.rewind();
             }
             else if(gameMode.equals("darkness")) {
+
+                //If a token has been found and countdown hasn't ended, the list won't be empty and this runs, drawing the round ring(s) on the screen depending on how many paths the list has at that moment.
+                if(!tokensPathList.isEmpty()) {
+                    Log.v("tokensPathList", "Not empty now!");
+                    tokensPath.rewind();
+
+                    for(Path tokenPathFromList : tokensPathList) {
+                        tokensPath.addPath(tokenPathFromList);
+                        Log.v("tokensPath content", ""+tokensPath.toString());
+                    }
+                    canvas.clipPath(tokensPath, Region.Op.DIFFERENCE);
+                }
+
+                //Fills the whole screen with a black rectangle.
                 canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
             }
             else if(gameMode.equals("lights_on")) {
