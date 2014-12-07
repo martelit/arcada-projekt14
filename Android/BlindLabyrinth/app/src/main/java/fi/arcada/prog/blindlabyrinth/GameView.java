@@ -287,7 +287,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putInt("score", prefs.getInt("score", 0) + (multiplierOne * multiplierTwo));
                 editor.commit();
-
+                Cache.getInstance().Audio.playSound("levelcompleted",(float)2.0);
                 Toast.makeText(App.getContext(), "You've reached the goal, congratz...", Toast.LENGTH_SHORT).show();
                 Activity gvb = (Activity) getContext();
                 gvb.finish();
@@ -322,6 +322,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 }.start();
 
                 String tokenText =  "Token #" + Integer.toString(map.foundTokens)  + " found";
+                Cache.getInstance().Audio.playSound("token",(float) 2.0);
                 if(map.foundTokens == map.maxTokens) tokenText += ". You've found all tokens.";
                 Toast.makeText(App.getContext(), tokenText, Toast.LENGTH_SHORT).show();
                 Log.v("TOKEN", "Token found");

@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.util.HashMap;
@@ -61,7 +62,9 @@ public class MainActivity extends GameActivity {
         ((Button) findViewById(R.id.button)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 startGame();
+
             }
         });
         ((Button) findViewById(R.id.btnaccel)).setOnClickListener(new View.OnClickListener() {
@@ -70,13 +73,13 @@ public class MainActivity extends GameActivity {
                 startAccelerometer ();
             }
         });
-        ((Button) findViewById(R.id.btnGameViewBlank)).setOnClickListener(new View.OnClickListener() {
+        ((ImageButton) findViewById(R.id.btnGameViewBlank)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startGameViewBlank();
             }
         });
-        ((Button) findViewById(R.id.btnSettings)).setOnClickListener(new View.OnClickListener() {
+        ((ImageButton) findViewById(R.id.btnSettings)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startSettings();

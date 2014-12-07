@@ -26,22 +26,24 @@
         android:layout_below="@+id/button"
         android:layout_centerHorizontal="true" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="To GameView"
+    <ImageButton
+        android:layout_width="110dp"
+        android:layout_height="60dp"
+        android:text="Start"
         android:id="@+id/btnGameViewBlank"
         android:layout_below="@+id/btnaccel"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/startbutton" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageButton
+        android:layout_width="140dp"
+        android:layout_height="60dp"
         android:text="Settings"
         android:id="@+id/btnSettings"
         android:layout_below="@+id/btnGameViewBlank"
-        android:layout_toRightOf="@+id/textView"
-        android:layout_toEndOf="@+id/textView" />
+        android:layout_centerHorizontal="true"
+
+        android:src="@drawable/settingsbutton" />
 
 
 </RelativeLayout>

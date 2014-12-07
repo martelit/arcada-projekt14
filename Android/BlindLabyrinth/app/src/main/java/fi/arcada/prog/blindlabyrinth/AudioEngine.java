@@ -61,6 +61,8 @@ public class AudioEngine extends Service {
 
         HashMap<String, Integer> sounds = new HashMap<String, Integer>();
         sounds.put("move", R.raw.rollin);
+        sounds.put("token",R.raw.tokenfound);
+        sounds.put("levelcompleted",R.raw.levelcompleted);
 
         init(music, sounds);
         playMusic();
