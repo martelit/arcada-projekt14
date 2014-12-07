@@ -24,7 +24,6 @@ public class GraphicsObject {
     protected int xSpeed, ySpeed;
 
     protected RectF size;
-    protected RectF glowSize;
 
     protected double timeStamp;
     protected double friction;
@@ -70,13 +69,22 @@ public class GraphicsObject {
     double xTest;
     double yTest;
     double kTest;
+    double xTestTemp;
+    double yTestTemp;
+    double kTestTemp;
+    double dirWallX;
+    double dirWallY;
+    double dirWallK;
+    double wallXTotal;
+    double wallYTotal;
+    double xSpeedDoubleFromCollision;
+    double ySpeedDoubleFromCollision;
+    double dirOutK;
 
     //Variables for getNewSpeedVectorXAndY. Probably only a temporary storing place.
     ArrayList<Double> xAndY;
     double baseVector;
     double multiplier;
-    double xTotal;
-    double yTotal;
 
     //Constructor designed for usage when an object of Ball is created.
     //Initializes values.

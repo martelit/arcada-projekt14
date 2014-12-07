@@ -314,21 +314,12 @@ public class Ball extends GraphicsObject {
             //This amount is decided by a for loop in the move() method, where lower angle values give more dots to check on the ball's outer line.
             for(final ArrayList<Integer> listObj : ballCoordinatesList) { //The for itself takes an ArrayList (ballCoordinatesList) that contains even more ArrayLists (of collisionPointXAndYPos, each containing 2 integers, namely one set of x- and y coordinates).
 
-                //int xP = listObj.get(0);
-                //int xY = listObj.get(1);
-
-                //Log.v("list value:", "grades "+grades+", x "+xP+", y "+xY);
-
-                //grades -= 5;
-
                 //If collision is found for any of the paired x- and y coordinates (representing one dot on the outer line), this runs.
                 if(map.checkCollision(new Point(listObj.get(0) + (int) preemptiveXDistance, listObj.get(1) + (int) preemptiveYDistance))) {
 
                     //Many points can come in contact with a wall with one pixels movement, so choosing the middle point of them all gives the best movement overall.
                     //So when collision is detected for the first time, values start being saved here, until the next point that doesn't collide, which is when the middle one is chosen from those values.
                     collisionsStarted = true;
-
-                    //Log.v("listObj and preemptives", "listObjX "+listObj.get(0)+" preempXInt "+(int) preemptiveXDistance+" added to list "+(listObj.get(0) + (int) preemptiveXDistance)+" listObjY "+listObj.get(1)+" preempYInt "+(int) preemptiveYDistance+" added to list "+(listObj.get(1) + (int) preemptiveYDistance));
 
                     //Saves the collision point for later use.
                     collisionPoints.add(new ArrayList<Integer>(){{
@@ -337,16 +328,7 @@ public class Ball extends GraphicsObject {
                         add(listObj.get(2));
                     }});
 
-                    //Log.v("assPoints", ""+collisionPoints.toString());
-
                     totalCollisions++;
-
-                    //int asd = listObj.get(0) + (int) preemptiveXDistance;
-                    //int asd2 = listObj.get(1) + (int) preemptiveYDistance;
-
-                    //Log.v("Collision in x", ""+asd);
-                    //Log.v("Collision in y", ""+asd2);
-                    //Log.v("Collisions total", ""+totalCollisions);
                 }
                 else {  //No collision for a point leads here.
 
@@ -361,27 +343,10 @@ public class Ball extends GraphicsObject {
 
                     collisionPointsMiddle = collisionPoints.get((int) Math.round(totalCollisions/2)-1);
 
-                    //int fuck = collisionPointsMiddle.get(0);
-                    //int fuck2 = collisionPointsMiddle.get(1);
-                    //Log.v("fucks", ""+fuck+" "+fuck2);
-
-                    //Log.v("ass7", ""+collisionPoints.get(7));
-                    //Log.v("ass7String", "" + collisionPoints.get(7).toString());
-                    //Log.v("assAllString", ""+collisionPoints.toString());
-
-                    //int fuck3 = collisionPointsMiddle.get(0);
-                    //int fuck4 = collisionPointsMiddle.get(1);
-                    //Log.v("fucks2", ""+fuck3+" "+fuck4);
-
-                    //int positionToGet = (int) Math.round(totalCollisions/2)-1;
-                    //Log.v("middlepos 0-?:", ""+positionToGet);
-
                     y2 = collisionPointsMiddle.get(1);    //Y for point of contact.
                     x2 = collisionPointsMiddle.get(0);    //X for point of contact.
                     y1 = (int) (Math.round((double) (yPosition)+(double) (height)/2))+(int) preemptiveYDistance;  //y for middle point of ball.
                     x1 = (int) (Math.round((double) (xPosition)+(double) (width)/2))+(int) preemptiveXDistance;   //x for middle point of ball.
-
-                    //Log.v("Ball information", "yPosition = "+yPosition+" height = "+height+" middle y original = "+Math.round((double) (yPosition)+(double) (height)/2)+" preDisY "+(int) preemptiveYDistance+" whole "+((int) (Math.round((double) (yPosition)+(double) (height)/2))+(int) preemptiveYDistance));
 
                     if(!(x2 == x1)) {
                         k1 = ((double) (y2)-(double) (y1))/((double) (x2)-(double) (x1));
@@ -396,14 +361,6 @@ public class Ball extends GraphicsObject {
                     else {
                         k2 = ySpeedDoubleVersion/0.0000000000000000001;
                     }
-
-                    //test2 & tanAlpha3 give same result (in radians)
-                    //double test2 = Math.atan2(y2-y1, x2-x1);
-                    //double tanAlpha = Math.abs((k1-k2)/(1+k1*k2));
-                    //double tanAlpha3 = Math.atan(tanAlpha);
-                    //double tanAlpha4 = Math.toDegrees(tanAlpha3); //In degrees
-
-                    //Math.atan2(y2-y1, x2-x1) = Math.atan(Math.abs((k1-k2)/(1+k1*k2)))
 
                     speedVectorLength = Math.sqrt(Math.pow(xSpeedDoubleVersion, 2)+Math.pow(ySpeedDoubleVersion, 2));
 
@@ -420,15 +377,8 @@ public class Ball extends GraphicsObject {
                     yTest = (Math.sin(Math.toRadians(testAngle)));
                     kTest = yTest/xTest;
 
-                    //Log.v("TestingEarly", "tanAlpha4 "+tanAlpha4+" collisionPointReverseAngle"+collisionPointReverseAngle+" testAngle "+testAngle);
-
-                    //Log.v("speedVectorLengthIn", ""+speedVectorLength);
-
-                    //Log.v("Testing", ""+k2+" "+kTest+" with yTest "+yTest+" and xTest "+xTest);
-
                     if(kTest <= k2+0.0001 && kTest >= k2-0.0001) {
                         //Same direction found, another test needed for the real one.
-                        //Log.v("Fail", "Same direction...");
 
                         testAngle = collisionPointReverseAngle-tanAlpha4;
 
@@ -436,13 +386,12 @@ public class Ball extends GraphicsObject {
                         yTest = (Math.sin(Math.toRadians(testAngle)));
                         kTest = yTest/xTest;
 
-                        //Log.v("Testing", ""+k2+" "+kTest+" with yTest "+yTest+" and xTest "+xTest);
-
                         if(kTest <= k2+0.0001 && kTest >= k2-0.0001) {
-                            //Log.v("Double fail", "Wtf this shouldn't happen...");
+                            //This should never run.
                         }
                         else {
-                            //Log.v("Success 2.", "Found new direction.");
+                            //New direction found.
+
                             ArrayList<Double> xAndYSpeeds = getNewSpeedVectorXAndY(xTest, yTest, speedVectorLength, kTest);
 
                             xSpeedDoubleVersion = xAndYSpeeds.get(0);
@@ -450,62 +399,85 @@ public class Ball extends GraphicsObject {
                         }
                     }
                     else {
-                        //Log.v("Success.", "Found new direction.");
-                        ArrayList<Double> xAndYSpeeds = getNewSpeedVectorXAndY(xTest, yTest, speedVectorLength, kTest);
+                        //Potential new direction found. A check needs to be done in the other direction to see if it's correct.
 
-                        xSpeedDoubleVersion = xAndYSpeeds.get(0);
-                        ySpeedDoubleVersion = xAndYSpeeds.get(1);
+                        //Before the second test, the values from the first test are temporarily saved, in case the test passes.
+                        xTestTemp = xTest;
+                        yTestTemp = yTest;
+                        kTestTemp = kTest;
+
+                        //Now with minus instead of plus.
+                        testAngle = collisionPointReverseAngle-tanAlpha4;
+
+                        xTest = (Math.cos(Math.toRadians(testAngle)));
+                        yTest = (Math.sin(Math.toRadians(testAngle)));
+                        kTest = yTest/xTest;
+
+                        if(kTest <= k2+0.0001 && kTest >= k2-0.0001) {
+                            //Second test direction was same as the original speed direction. Using temp values to calculate new direction.
+
+                            ArrayList<Double> xAndYSpeeds = getNewSpeedVectorXAndY(xTestTemp, yTestTemp, speedVectorLength, kTestTemp);
+
+                            xSpeedDoubleVersion = xAndYSpeeds.get(0);
+                            ySpeedDoubleVersion = xAndYSpeeds.get(1);
+                        }
+                        else {
+                            //No match found in either direction, which means the above method didn't work. Another method is used.
+
+                            speedVectorLength = Math.sqrt(Math.pow(xSpeedDoubleVersion, 2)+Math.pow(ySpeedDoubleVersion, 2));
+
+                            //dirWall here
+                            dirWallX = x1-x2;
+                            dirWallY = y1-y2;
+
+                            if(!(dirWallX == 0)) {
+                                dirWallK = dirWallY/dirWallX;
+                            }
+                            else {
+                                dirWallK = dirWallY/0.0000000000000000001;
+                            }
+
+                            ArrayList<Double> xAndYFromWall = getNewSpeedVectorXAndY(dirWallX, dirWallY, speedVectorLength, dirWallK);
+
+                            wallXTotal = xAndYFromWall.get(0);
+                            wallYTotal = xAndYFromWall.get(1);
+
+                            //dirNew here (dirWall + dirBall)
+                            xSpeedDoubleFromCollision = xSpeedDoubleVersion+wallXTotal;
+                            ySpeedDoubleFromCollision = ySpeedDoubleVersion+wallYTotal;
+
+                            if(!(xSpeedDoubleFromCollision == 0)) {
+                                dirOutK = ySpeedDoubleFromCollision/xSpeedDoubleFromCollision;
+                            }
+                            else {
+                                dirOutK = ySpeedDoubleFromCollision/0.0000000000000000001;
+                            }
+
+                            if(!((xSpeedDoubleFromCollision == 0 || ySpeedDoubleFromCollision == 0 ) && (Math.abs(k2)-0.0001 <= Math.abs(dirWallK) || Math.abs(k2)+0.0001 >= Math.abs(dirWallK)))) {
+
+                                xAndYFromWall.clear();
+                                xAndYFromWall = getNewSpeedVectorXAndY(xSpeedDoubleFromCollision, ySpeedDoubleFromCollision, speedVectorLength, dirOutK);
+
+                                xSpeedDoubleVersion = xAndYFromWall.get(0);
+                                ySpeedDoubleVersion = xAndYFromWall.get(1);
+                            }
+                            else {
+                                xSpeedDoubleVersion *= -1;
+                                ySpeedDoubleVersion *= -1;
+                            }
+
+                            xAndYFromWall.clear();
+                        }
                     }
 
+                    //Everything works without these lines, they are there just to ensure the ball doesn't bounce back with 100% speed.
                     xSpeedDoubleVersion = xSpeedDoubleVersion*(0.4+(0.6*(Math.abs(tanAlpha4)/180)));
                     ySpeedDoubleVersion = ySpeedDoubleVersion*(0.4+(0.6*(Math.abs(tanAlpha4)/180)));
-
-                    //double speedVectorLength2 = Math.sqrt(Math.pow(xSpeedDoubleVersion, 2)+Math.pow(ySpeedDoubleVersion, 2));
-                    //Log.v("speedVectorLengthOut", ""+speedVectorLength2);
-
-
-                    //Log.v("tanAlpha", ""+tanAlpha+" "+tanAlpha2+" "+tanAlpha3+" "+tanAlpha4);
-
-                    //double xxx =  (-Math.tan(tanAlpha3)+k1)/(Math.tan(tanAlpha3)*k1+1);
-                    //double xxx2 =  -((Math.tan(tanAlpha3)+k1)/(Math.tan(tanAlpha3)*k1-1));
-
-                    //Log.v("k1 & one solution", ""+k1+" "+xxx+" "+xxx2);
-
-                    //Math.atan2(y2-y1, x2-x1) used, which solves an unknown tan(x)=
-                    //double test = Math.atan2((listObj.get(1) + (int) preemptiveYDistance)-(Math.round(yPosition+height/2) + (int) preemptiveYDistance), (listObj.get(0) + (int) preemptiveXDistance)-(Math.round(xPosition+width/2) + (int) preemptiveXDistance));
-                    /*double test2 = Math.atan2(y2-y1, x2-x1);
-                    double test3 = Math.toDegrees(Math.atan2(y2-y1, x2-x1));
-                    Log.v("y2:", ""+y2);
-                    Log.v("y1:", ""+y1);
-                    Log.v("y2-y1:", ""+(y2-y1));
-                    Log.v("x2:", ""+x2);
-                    Log.v("x1:", ""+x1);
-                    Log.v("x2-x1:", ""+(x2-x1));
-                    //Log.v("Tan:", ""+test);
-                    Log.v("Tan2:", ""+test2);
-                    Log.v("Tan3:", ""+test3);*/
-
-                    //Can be everything from -1 to 1, where 1 means the speed is left unchanged, 0 means it drops to 0 and -1 means it's totally reversed.
-                    //double collisionX = (2*Math.abs(Math.cos(Math.toRadians(collisionPointsMiddle.get(2)))))-1;
-                    //double collisionY = (2*Math.abs(Math.sin(Math.toRadians(collisionPointsMiddle.get(2)))))-1;
-
-                    //Log.v("X & Y speeds before + angle", ""+xSpeedDoubleVersion+" "+ySpeedDoubleVersion+" "+collisionPointsMiddle.get(2));
-
-                    //Finally decides the new speed of the ball.
-                    //xSpeedDoubleVersion = (0.4)*(-1)*xSpeedDoubleVersion*collisionX;
-                    //ySpeedDoubleVersion = (0.4)*(-1)*ySpeedDoubleVersion*collisionY;
-                    //xSpeedDoubleVersion = (0.4+(0.6*Math.abs(Math.sin(Math.toRadians(collisionPointsMiddle.get(2))))))*(-1)*xSpeedDoubleVersion*collisionX;
-                    //ySpeedDoubleVersion = (0.4+(0.6*Math.abs(Math.cos(Math.toRadians(collisionPointsMiddle.get(2))))))*(-1)*ySpeedDoubleVersion*collisionY;
 
                     //Since collision happened, a correct combination of xSpeed and ySpeed was found just one tick before the one that caused a collision.
                     //These speeds will now be given as the true values for xSpeed and ySpeed for the coming frame visible to the player, resulting with the ball moving just beside a wall with one or more of its collision points.
                     xSpeed = (int) (preemptiveXDistance-preemptiveXSpeed);
                     ySpeed = (int) (preemptiveYDistance-preemptiveYSpeed);
-
-                    //xSpeedDoubleVersion = 0;
-                    //ySpeedDoubleVersion = 0;
-
-                    //Log.v("X & Y (-1 to 1) and speeds after", ""+collisionX+" "+collisionY+" "+xSpeedDoubleVersion+" "+ySpeedDoubleVersion);
 
                     //This is just to ensure the while above breaks.
                     preemptiveXDistance = xSpeed;
