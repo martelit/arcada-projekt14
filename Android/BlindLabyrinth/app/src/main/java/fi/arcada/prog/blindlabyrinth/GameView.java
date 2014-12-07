@@ -37,7 +37,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
     float acceleratorY = 0;
     float acceleratorZ = 0;
 
-    boolean DEBUG_CONTROLS = true;
+    boolean DEBUG_CONTROLS = false;
 
     public Bitmap ballBitmap;
     public Bitmap bmAlpha;
