@@ -8,16 +8,21 @@
 	<script src="jQuery/jquery.mobile-1.4.5.min.js"></script>	
 	<script src="jQuery/jquery-1.11.1.min.js"></script>	
 	<script src="jQuery/velocity.min.js"></script>
-	<!--<script src="js/maze.js"></script> -->
 	<script src="js/engine.js"></script>
    
   </head>
   <body>
   <!----------------------------------------------- SPELPLANEN ----------------------------------------------->
+  <!--Button to test the sound and a 30px change in the height of the canvas in order to be able to press it:
 	<input id="clickMe" type="button" value="CollisionSound" onclick="javascript:buttonClicked();" />
 	<canvas id="canvas" style="position:absolute; left:0px; top:30px;"></canvas>
-    <div id="ball" style="height:25px; width:25px; background-color:red; border-radius:50%; position:absolute; left:50px; top:50px;"></div>
-	
+	uncomment to test-->
+	<div id="test" style="position:absolute; left:0px; top:0px;"></div>
+	<canvas id="canvas" style="position:absolute; left:0px; top:0px;"></canvas>
+	<img id="skin" style="position:absolute; left:0px; top:0px;"></img>
+	<canvas id="symbols" style="position:absolute; left:0px; top:0px;"></canvas>
+    <div id="ball" style="background-color:red; border-radius:50%; position:absolute;"></div>
+	<canvas id="darkness" style="position:absolute; left:0px; top:0px;"></canvas>
   <!----------------------------------------------- SPELPLANEN ----------------------------------------------->
   </body>
 </html>

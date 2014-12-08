@@ -8,9 +8,9 @@
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
         <link rel="stylesheet" type="text/css" href="css/index.css" />
 		<!--- jQuery Mobile API added 18.11.2014 -->
-		<link rel="stylesheet" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
-		<script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
-		<script src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+		<link rel="stylesheet" href="jQuery/jquery.mobile-1.2.0.min.css" />
+		<script src="jQuery/jquery-1.8.2.min.js"></script>
+		<script src="jQuery/jquery.mobile-1.2.0.min.js"></script>
 		<!--- jQuery Mobile / -->
 		<script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/index.js"></script>
@@ -21,32 +21,89 @@
 
             function onLoad()
             {
-                  document.addEventListener("deviceready", onDeviceReady, true);
+                 document.addEventListener("deviceready", onDeviceReady, true);
+				 checkCurrentSettings();
             }
 
             function exitFromApp()
-             {
+            {
                 navigator.app.exitApp();
-             }
+            }
 
         </script>
-		
 		<script src="js/engine.js"></script>
 		<script>
 		//Store the values of the radio buttons into global variables
 		function storeValues() {
-			$('input[name="radioSize"]').change(function(){
-			labyrinthSize = this.value
+			$('#radioSize :radio:checked').val(function(){
+			localStorage.size = this.value
 			})
-			//Alert to check global variable
-			alert (labyrinthSize);
 			
-			$('input[name="radioMode"]').change(function(){
-			labyrinthMode = this.value
+			$('#radioMode :radio:checked').val(function(){
+			localStorage.mode = this.value
 			})
-			//Alert to check global variable
-			alert (labyrinthMode);
+			
+			$('#radioColor :radio:checked').val(function(){
+			localStorage.color = this.value
+			})
 		};
+		
+		function checkCurrentSettings(){
+			
+			var s = localStorage.size;
+			var m = localStorage.mode;
+			var c = localStorage.color;
+			
+			//Check selected SIZE
+			if(s == "undefined" || s == "random"){
+				$('#radioSize :radio:eq(0)').attr("checked", "checked");
+			}
+			else if(s == "small"){
+				$('#radioSize :radio:eq(1)').attr("checked", "checked");
+			
+			}
+			else if(s == "medium"){
+				$('#radioSize :radio:eq(2)').attr("checked", "checked");
+			
+			}
+			else if(s == "big"){
+				$('#radioSize :radio:eq(3)').attr("checked", "checked");			
+			}
+
+			//Check selected MODE
+			if(m == "undefined" || m == "random"){
+				$('#radioMode :radio:eq(0)').attr("checked", "checked");
+			}
+			else if(m == "visible"){
+				$('#radioMode :radio:eq(1)').attr("checked", "checked");
+			
+			}
+			else if(m == "trace"){
+				$('#radioMode :radio:eq(2)').attr("checked", "checked");
+			
+			}
+			else if(m == "glowing"){
+				$('#radioMode :radio:eq(3)').attr("checked", "checked");	
+			}
+			else if(m == "dark"){
+				$('#radioMode :radio:eq(4)').attr("checked", "checked");	
+			}
+
+			//Check selected COLOR
+			if(c == "red"){
+				$('#radioColor :radio:eq(0)').attr("checked", "checked");
+			}
+			else if(c == "green"){
+				$('#radioColor :radio:eq(1)').attr("checked", "checked");			
+			}
+			else if(c == "blue"){
+				$('#radioColor :radio:eq(2)').attr("checked", "checked");	
+			}			
+			
+			$('#radioSize :radio').checkboxradio("refresh");			
+			$('#radioMode :radio').checkboxradio("refresh");		
+			$('#radioColor :radio').checkboxradio("refresh");		
+		}
 		</script>
 		
         <title>Blind Labyrint</title>
@@ -76,44 +133,60 @@
 <div data-role="page" id="pagetwo">
   <div data-role="header">
     <h1>Settings</h1>
-  </div>
-  <div>
-            <form id="register_complaint" action="#" method="get">
+	</div>
+	<div>
+    <form id="register_complaint" action="#" method="get">
  
-			<div data-role="fieldcontain">
-			<fieldset data-role="controlgroup">
-			<legend>Choose labyrinth size:</legend>
+<div data-role="fieldcontain">
+<fieldset data-role="controlgroup" id="radioSize">
+		<legend>Choose labyrinth size:</legend>
 		
+		<input type="radio" name="radioSize" id="radioSize-1" value="random"/>
+     	<label for="radioSize-1">Random</label>		
 		
-     	<input type="radio" name="radioSize" id="radioSize-1" value="small" checked="checked" />
-     	<label for="radioSize-1">Small</label>
+     	<input type="radio" name="radioSize" id="radioSize-2" value="small" />
+     	<label for="radioSize-2">Small</label>
 
-     	<input type="radio" name="radioSize" id="radioSize-2" value="medium"  />
-     	<label for="radioSize-2">Medium</label>
+     	<input type="radio" name="radioSize" id="radioSize-3" value="medium"  />
+     	<label for="radioSize-3">Medium</label>
 
-     	<input type="radio" name="radioSize" id="radioSize-3" value="big"  />
-     	<label for="radioSize-3">Big</label>
-		
-<!-- 
-     	<input type="radio" name="radio-choice" id="radio-choice-4" value="choice-4"  />
-     	<label for="radio-choice-4">Very big</label>
--->
+     	<input type="radio" name="radioSize" id="radioSize-4" value="big"  />
+     	<label for="radioSize-4">Big</label>
+
 </fieldset>
 
-<fieldset data-role="controlgroup">
-			<legend>Choose labyrinth effect:</legend>
-			
-     	<input type="radio" name="radioMode" id="radioMode-1" value="visible" checked="checked" />
-     	<label for="radioMode-1">Fully visible</label>
+<fieldset data-role="controlgroup" id="radioMode">
+		<legend>Choose game mode:</legend>
+		
+		<input type="radio" name="radioMode" id="radioMode-1" value="random"/>
+     	<label for="radioMode-1">Random</label>
+		
+     	<input type="radio" name="radioMode" id="radioMode-2" value="visible" />
+     	<label for="radioMode-2">Fully visible</label>
 
-     	<input type="radio" name="radioMode" id="radioMode-2" value="trace"  />
-     	<label for="radioMode-2">Ball leaves trace</label>
+     	<input type="radio" name="radioMode" id="radioMode-3" value="trace"  />
+     	<label for="radioMode-3">Ball leaves trace</label>
 
-     	<input type="radio" name="radioMode" id="radioMode-3" value="glowing"  />
-     	<label for="radioMode-3">Glowing ball</label>
+     	<input type="radio" name="radioMode" id="radioMode-4" value="glowing"  />
+     	<label for="radioMode-4">Glowing ball</label>		
+
+     	<input type="radio" name="radioMode" id="radioMode-5" value="dark"  />
+     	<label for="radioMode-5">Nightmare</label>
 
 </fieldset>
-			</div>
+<fieldset data-role="controlgroup" id="radioColor">
+		<legend>Choose ball color:</legend>
+		
+		<input type="radio" name="radioColor" id="radioColor-1" value="red" />
+     	<label for="radioColor-1">Red</label>
+		
+     	<input type="radio" name="radioColor" id="radioColor-2" value="green" />
+     	<label for="radioColor-2">Green</label>
+
+     	<input type="radio" name="radioColor" id="radioColor-3" value="blue"  />
+     	<label for="radioColor-3">Blue</label>
+</fieldset>
+</div>
  
 <a href="#pageone"><input type="button" name="submit" value="Apply settings" onclick="storeValues()" /></a>
  

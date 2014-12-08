@@ -25,6 +25,8 @@ E:\DEV\LabyrintApp\platforms\android\ant-build\res\drawable-port-xhdpi\screen.pn
 E:\DEV\LabyrintApp\platforms\android\ant-build\res\drawable-xxhdpi\icon.png \
 E:\DEV\LabyrintApp\platforms\android\assets\www \
 E:\DEV\LabyrintApp\platforms\android\assets\_where-is-www.txt \
+E:\DEV\LabyrintApp\platforms\android\assets\www\0735.ogg \
+E:\DEV\LabyrintApp\platforms\android\assets\www\chains.ogg \
 E:\DEV\LabyrintApp\platforms\android\assets\www\cordova.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\cordova_plugins.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\css \
@@ -35,11 +37,16 @@ E:\DEV\LabyrintApp\platforms\android\assets\www\img \
 E:\DEV\LabyrintApp\platforms\android\assets\www\index.html \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery \
 E:\DEV\LabyrintApp\platforms\android\assets\www\js \
+E:\DEV\LabyrintApp\platforms\android\assets\www\maps \
+E:\DEV\LabyrintApp\platforms\android\assets\www\mirror.ogg \
 E:\DEV\LabyrintApp\platforms\android\assets\www\plugins \
 E:\DEV\LabyrintApp\platforms\android\assets\www\punch.mp3 \
+E:\DEV\LabyrintApp\platforms\android\assets\www\punch.ogg \
 E:\DEV\LabyrintApp\platforms\android\assets\www\res \
 E:\DEV\LabyrintApp\platforms\android\assets\www\settings.html \
+E:\DEV\LabyrintApp\platforms\android\assets\www\skins \
 E:\DEV\LabyrintApp\platforms\android\assets\www\small.jpg \
+E:\DEV\LabyrintApp\platforms\android\assets\www\sounds \
 E:\DEV\LabyrintApp\platforms\android\assets\www\spec \
 E:\DEV\LabyrintApp\platforms\android\assets\www\spec.html \
 E:\DEV\LabyrintApp\platforms\android\assets\www\css\index.css \
@@ -47,6 +54,9 @@ E:\DEV\LabyrintApp\platforms\android\assets\www\img\logo.png \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\demos \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\images \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery-1.11.1.min.js \
+E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery-1.8.2.min.js \
+E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile-1.2.0.min.css \
+E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile-1.2.0.min.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile-1.4.5.css \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile-1.4.5.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\jquery.mobile-1.4.5.min.css \
@@ -788,6 +798,9 @@ E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\images\icons-svg\video-bl
 E:\DEV\LabyrintApp\platforms\android\assets\www\jQuery\images\icons-svg\video-white.svg \
 E:\DEV\LabyrintApp\platforms\android\assets\www\js\engine.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\js\index.js \
+E:\DEV\LabyrintApp\platforms\android\assets\www\maps\big.png \
+E:\DEV\LabyrintApp\platforms\android\assets\www\maps\medium.png \
+E:\DEV\LabyrintApp\platforms\android\assets\www\maps\small.png \
 E:\DEV\LabyrintApp\platforms\android\assets\www\plugins\org.apache.cordova.device-motion \
 E:\DEV\LabyrintApp\platforms\android\assets\www\plugins\org.apache.cordova.file \
 E:\DEV\LabyrintApp\platforms\android\assets\www\plugins\org.apache.cordova.media \
@@ -881,6 +894,11 @@ E:\DEV\LabyrintApp\platforms\android\assets\www\res\screen\ios\screen-iphone-por
 E:\DEV\LabyrintApp\platforms\android\assets\www\res\screen\tizen\README.md \
 E:\DEV\LabyrintApp\platforms\android\assets\www\res\screen\webos\screen-64.png \
 E:\DEV\LabyrintApp\platforms\android\assets\www\res\screen\windows-phone\screen-portrait.jpg \
+E:\DEV\LabyrintApp\platforms\android\assets\www\skins\brushed.png \
+E:\DEV\LabyrintApp\platforms\android\assets\www\skins\finish.png \
+E:\DEV\LabyrintApp\platforms\android\assets\www\skins\kitty.png \
+E:\DEV\LabyrintApp\platforms\android\assets\www\skins\skulls.png \
+E:\DEV\LabyrintApp\platforms\android\assets\www\skins\token.png \
 E:\DEV\LabyrintApp\platforms\android\assets\www\spec\helper.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\spec\index.js \
 E:\DEV\LabyrintApp\platforms\android\assets\www\spec\lib \
