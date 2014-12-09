@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -23,6 +25,8 @@ public class Settings extends GameActivity {
         String size = prefs.getString("size", "small");
         String gameMode = prefs.getString("gameMode", "lights_on");
         String ball = prefs.getString("ball", "ball1");
+        int soundInt = prefs.getInt("sound", 1);
+        int musicInt = prefs.getInt("music", 1);
 
         int resID = getResources().getIdentifier(size, "id", "fi.arcada.prog.blindlabyrinth");
         RadioButton rb1 = (RadioButton) findViewById(resID);
@@ -36,6 +40,43 @@ public class Settings extends GameActivity {
         rb1 = (RadioButton) findViewById(resID);
         rb1.setChecked(true);
 
+        CheckBox cb1 = (CheckBox) findViewById(R.id.sound);
+        CheckBox cb2 = (CheckBox) findViewById(R.id.music);
+
+        if(soundInt == 1)
+            cb1.setChecked(true);
+        if(musicInt == 1)
+            cb2.setChecked(true);
+
+        cb1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
+                SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                if(isChecked) {
+                    editor.putInt("sound", 1);
+                    editor.commit();
+                } else {
+                    editor.putInt("sound", 0);
+                    editor.commit();
+                }
+            }
+        });
+
+        cb2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
+                SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                if(isChecked) {
+                    editor.putInt("music", 1);
+                    editor.commit();
+                } else {
+                    editor.putInt("music", 0);
+                    editor.commit();
+                }
+            }
+        });
 
         RadioGroup rdGroup = (RadioGroup) findViewById(R.id.gameMode);
         rdGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
