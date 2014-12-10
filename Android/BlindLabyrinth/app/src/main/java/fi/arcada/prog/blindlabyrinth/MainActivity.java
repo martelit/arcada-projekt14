@@ -59,20 +59,6 @@ public class MainActivity extends GameActivity {
         }
 
         // Bind controls to needed actions here, button example -LL
-        ((Button) findViewById(R.id.button)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                startGame();
-
-            }
-        });
-        ((Button) findViewById(R.id.btnaccel)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startAccelerometer ();
-            }
-        });
         ((ImageButton) findViewById(R.id.btnGameViewBlank)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
