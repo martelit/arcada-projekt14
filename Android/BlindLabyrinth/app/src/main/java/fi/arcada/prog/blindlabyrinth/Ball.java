@@ -371,13 +371,12 @@ public class Ball extends GraphicsObject {
                     speedVectorLength = Math.sqrt(Math.pow(xSpeedDoubleVersion, 2)+Math.pow(ySpeedDoubleVersion, 2));
 
                     tanAlpha = Math.abs((k1-k2)/(1+k1*k2));
-                    tanAlpha2 = Math.toDegrees(tanAlpha);
-                    tanAlpha3 = Math.atan(tanAlpha);
+                    tanAlpha2 = Math.atan(tanAlpha);
 
-                    tanAlpha4 = Math.toDegrees(tanAlpha3);
+                    tanAlpha3 = Math.toDegrees(tanAlpha2);
 
                     collisionPointReverseAngle = collisionPointsMiddle.get(2)+180;
-                    testAngle = collisionPointReverseAngle+tanAlpha4;
+                    testAngle = collisionPointReverseAngle+tanAlpha3;
 
                     xTest = (Math.cos(Math.toRadians(testAngle)));
                     yTest = (Math.sin(Math.toRadians(testAngle)));
@@ -386,7 +385,7 @@ public class Ball extends GraphicsObject {
                     if(kTest <= k2+0.0001 && kTest >= k2-0.0001) {
                         //Same direction found, another test needed for the real one.
 
-                        testAngle = collisionPointReverseAngle-tanAlpha4;
+                        testAngle = collisionPointReverseAngle-tanAlpha3;
 
                         xTest = (Math.cos(Math.toRadians(testAngle)));
                         yTest = (Math.sin(Math.toRadians(testAngle)));
@@ -413,7 +412,7 @@ public class Ball extends GraphicsObject {
                         kTestTemp = kTest;
 
                         //Now with minus instead of plus.
-                        testAngle = collisionPointReverseAngle-tanAlpha4;
+                        testAngle = collisionPointReverseAngle-tanAlpha3;
 
                         xTest = (Math.cos(Math.toRadians(testAngle)));
                         yTest = (Math.sin(Math.toRadians(testAngle)));
@@ -477,8 +476,8 @@ public class Ball extends GraphicsObject {
                     }
 
                     //Everything works without these lines, they are there just to ensure the ball doesn't bounce back with 100% speed.
-                    xSpeedDoubleVersion = xSpeedDoubleVersion*(0.4+(0.6*(Math.abs(tanAlpha4)/180)));
-                    ySpeedDoubleVersion = ySpeedDoubleVersion*(0.4+(0.6*(Math.abs(tanAlpha4)/180)));
+                    xSpeedDoubleVersion = xSpeedDoubleVersion*(0.4+(0.6*(Math.abs(tanAlpha3)/180)));
+                    ySpeedDoubleVersion = ySpeedDoubleVersion*(0.4+(0.6*(Math.abs(tanAlpha3)/180)));
 
                     //Since collision happened, a correct combination of xSpeed and ySpeed was found just one tick before the one that caused a collision.
                     //These speeds will now be given as the true values for xSpeed and ySpeed for the coming frame visible to the player, resulting with the ball moving just beside a wall with one or more of its collision points.

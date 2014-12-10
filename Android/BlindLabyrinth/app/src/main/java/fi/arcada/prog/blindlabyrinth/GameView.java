@@ -41,7 +41,6 @@ public class GameView extends View implements Runnable, SensorEventListener {
     boolean DEBUG_CONTROLS = false;
 
     public Bitmap ballBitmap;
-    public Bitmap bmAlpha;
     public Ball ball;
     public Map map;
     public Controller ctrl;
@@ -93,6 +92,9 @@ public class GameView extends View implements Runnable, SensorEventListener {
         }
         else if(prefs.getString("ball", "nothing").equals("ball3")) {
             ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball3);
+        }
+        else if(prefs.getString("ball", "nothing").equals("ball4")) {
+            ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball4);
         }
         else {  //Gives default ball.
             ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
@@ -149,6 +151,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
         //images used for background and bitmaps are stored in app/src/main/java/res/drawable
         //this.setBackgroundResource(R.drawable.nameOfChosenLabyrinthBackgroundForGameScreen);
+        this.setBackgroundColor(Color.BLACK);
         //ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 2;
@@ -303,7 +306,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
                     addCircle(ball.getPosition().x+ball.midPointLength, ball.getPosition().y+ball.midPointLength, ball.midPointLength+ball.width*4, Path.Direction.CW);
                 }});
 
-                new CountDownTimer(10000, 1000) {
+                new CountDownTimer(5000, 1000) {
 
                     public void onTick(long millisUntilFinished) {
 
@@ -338,17 +341,26 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 ctrl.draw(canvas);
             }
 
-            //Draws the ball with either glow or no glow attached under depending on settings chosen.
-            if(ball.gradientMode) {
-                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), ball.getGradient());
-                canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
-            }
-            else {
-                canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
-            }
+            //Draws the ball.
+            canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
 
-            //Decides how much darkness is drawn in addition to the labyrinth and the ball.
+            //Decides what else is drawn depending on the game mode.
             if(gameMode.equals("trailblazer")) {
+
+                //If a token has been found and countdown hasn't ended, the list won't be empty and this runs, drawing the round ring(s) on the screen depending on how many paths the list has at that moment.
+                if(!tokensPathList.isEmpty()) {
+                    //Log.v("tokensPathList", "Not empty now!");
+                    tokensPath.rewind();
+
+                    for(Path tokenPathFromList : tokensPathList) {
+                        tokensPath.addPath(tokenPathFromList);
+                        //Log.v("tokensPath content", ""+tokensPath.toString());
+                    }
+                    canvas.clipPath(tokensPath, Region.Op.DIFFERENCE);
+                }
+
+                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), ball.getGradient());
+
                 //Set the current path for ball as region.
                 region.setPath(ballPath, new Region(0, 0, canvas.getWidth(), canvas.getHeight()));
 
@@ -366,6 +378,21 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
             }
             else if(gameMode.equals("glowstick")) {
+
+                //If a token has been found and countdown hasn't ended, the list won't be empty and this runs, drawing the round ring(s) on the screen depending on how many paths the list has at that moment.
+                if(!tokensPathList.isEmpty()) {
+                    //Log.v("tokensPathList", "Not empty now!");
+                    tokensPath.rewind();
+
+                    for(Path tokenPathFromList : tokensPathList) {
+                        tokensPath.addPath(tokenPathFromList);
+                        //Log.v("tokensPath content", ""+tokensPath.toString());
+                    }
+                    canvas.clipPath(tokensPath, Region.Op.DIFFERENCE);
+                }
+
+                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), ball.getGradient());
+
                 //As of the latest solution nothing needs to be done here. Saving code for now in case of reverting to old model.
 
                 //ballPath.addCircle(ball.getPosition().x+ball.width/2, ball.getPosition().y+ball.height/2, ball.midPointLength+ball.width, Path.Direction.CW);
@@ -379,12 +406,12 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
                 //If a token has been found and countdown hasn't ended, the list won't be empty and this runs, drawing the round ring(s) on the screen depending on how many paths the list has at that moment.
                 if(!tokensPathList.isEmpty()) {
-                    Log.v("tokensPathList", "Not empty now!");
+                    //Log.v("tokensPathList", "Not empty now!");
                     tokensPath.rewind();
 
                     for(Path tokenPathFromList : tokensPathList) {
                         tokensPath.addPath(tokenPathFromList);
-                        Log.v("tokensPath content", ""+tokensPath.toString());
+                        //Log.v("tokensPath content", ""+tokensPath.toString());
                     }
                     canvas.clipPath(tokensPath, Region.Op.DIFFERENCE);
                 }
@@ -400,8 +427,6 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 ctrl.draw(canvas);
             }
         }
-
-
     }
 
     @Override

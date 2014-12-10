@@ -63,7 +63,6 @@ public class GraphicsObject {
     double tanAlpha;
     double tanAlpha2;
     double tanAlpha3;
-    double tanAlpha4;
     double collisionPointReverseAngle;
     double testAngle;
     double xTest;
