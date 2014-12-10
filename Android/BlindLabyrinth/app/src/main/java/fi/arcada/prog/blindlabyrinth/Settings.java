@@ -3,11 +3,13 @@ package fi.arcada.prog.blindlabyrinth;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.Image;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -128,10 +130,32 @@ public class Settings extends GameActivity {
                 editor.commit(); //important, otherwise it wouldn't save.
                 TextView tv1 = (TextView) findViewById(R.id.saveMessage);
                 tv1.setText("Ball change saved");
+                updateBallPreview();
             }
         });
+
+        updateBallPreview();
     }
 
+    private void updateBallPreview() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        ImageView ballPreviewImage = (ImageView) findViewById(R.id.ballPreview);
+        if(prefs.getString("ball", "nothing").equals("ball1")) {
+            ballPreviewImage.setImageResource(R.drawable.ball);
+        }
+        else if(prefs.getString("ball", "nothing").equals("ball2")) {
+            ballPreviewImage.setImageResource(R.drawable.ball2);
+        }
+        else if(prefs.getString("ball", "nothing").equals("ball3")) {
+            ballPreviewImage.setImageResource(R.drawable.ball3);
+        }
+        else if(prefs.getString("ball", "nothing").equals("ball4")) {
+            ballPreviewImage.setImageResource(R.drawable.ball4);
+        }
+        else {
+            ballPreviewImage.setImageResource(android.R.color.transparent);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

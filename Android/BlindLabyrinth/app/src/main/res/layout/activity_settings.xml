@@ -81,89 +81,15 @@
 
     </RadioGroup>
 
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="200dp"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="220dp"
-        android:id="@+id/horizontalScrollView">
-
-        <RadioGroup
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:id="@+id/ball">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ball"
-                android:textStyle="normal|bold"
-                android:textSize="20sp" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Blue"
-                android:id="@+id/ball1" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Earth"
-                android:id="@+id/ball2" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Green"
-                android:id="@+id/ball3" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ball 4"
-                android:id="@+id/ball4" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ball 5"
-                android:id="@+id/ball5" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ball 6"
-                android:id="@+id/ball6" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ball 7"
-                android:id="@+id/ball7" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ball 8"
-                android:id="@+id/ball8" />
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ball 9"
-                android:id="@+id/ball9" />
-        </RadioGroup>
-
-    </ScrollView>
-
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/saveMessage"
+        android:textAlignment="center"
+        android:layout_toRightOf="@+id/ball"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:textAlignment="center" />
+        android:layout_alignRight="@+id/size"
+        android:layout_alignEnd="@+id/size" />
 
     <CheckBox
         android:layout_width="wrap_content"
@@ -180,5 +106,58 @@
         android:id="@+id/sound"
         android:layout_alignBottom="@+id/size"
         android:layout_alignLeft="@+id/size" />
+
+    <RadioGroup
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/ball"
+        android:layout_below="@+id/music"
+        android:layout_alignRight="@+id/gameMode"
+        android:layout_alignEnd="@+id/gameMode">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ball"
+            android:textStyle="normal|bold"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Blue"
+            android:id="@+id/ball1" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Earth"
+            android:id="@+id/ball2" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Green"
+            android:id="@+id/ball3" />
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Intruder"
+            android:id="@+id/ball4" />
+
+    </RadioGroup>
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_below="@+id/size"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentRight="true"
+        android:id="@+id/ballPreview"
+        android:layout_marginTop="40dp"
+        android:layout_marginRight="80dp"/>
 
 </RelativeLayout>

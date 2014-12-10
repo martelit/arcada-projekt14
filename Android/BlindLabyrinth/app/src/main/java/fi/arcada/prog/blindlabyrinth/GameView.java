@@ -92,6 +92,9 @@ public class GameView extends View implements Runnable, SensorEventListener {
         else if(prefs.getString("ball", "nothing").equals("ball3")) {
             ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball3);
         }
+        else if(prefs.getString("ball", "nothing").equals("ball4")) {
+            ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball4);
+        }
         else {  //Gives default ball.
             ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
         }
