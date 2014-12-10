@@ -26,6 +26,14 @@ public class Graphic {
         setPosition(0, 0);
     }
 
+    public void release() {
+        image.recycle();
+        hitbox = null;
+        dimension = null;
+        position = null;
+
+    }
+
     public void setSize(int width, int height) {
         dimension.x = width;
         dimension.y = height;

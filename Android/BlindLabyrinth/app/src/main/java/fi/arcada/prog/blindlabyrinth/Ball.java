@@ -31,6 +31,8 @@ public class Ball extends GraphicsObject {
         if(xPosition > view.getWidth()-width && xSpeed > 0) xSpeedDoubleVersion *= -0.4;
         if(yPosition < 0 && ySpeed < 0) ySpeedDoubleVersion *= -0.4;
         if(yPosition > view.getHeight()-height && ySpeed > 0) ySpeedDoubleVersion *= -0.4;
+
+
     }
 
     public Point getTop() {
@@ -175,6 +177,8 @@ public class Ball extends GraphicsObject {
         //Updates xPosition and yPosition with new values according to the current speed.
         xPosition = xPosition + xSpeed;
         yPosition = yPosition + ySpeed;
+
+        Cache.getInstance().Audio.playMove(xSpeed + ySpeed);
 
         //Before correct movement can be chosen, a check for collisions should run, since that could affect direction and strength of the speed.
         checkCollisions();
@@ -334,6 +338,8 @@ public class Ball extends GraphicsObject {
 
                     //If else is activated once there has been one or more collisions, they are over so collisionsEnded needs to be true.
                     if(collisionsStarted) {
+
+                        Cache.getInstance().Audio.playWall();
                         collisionsEnded = true;
                     }
                 }

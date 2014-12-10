@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -64,6 +65,14 @@ public class Map {
         parseMask();
     }
 
+    public void release() {
+        mask.release();
+        skin.release();
+        goal.release();
+
+        //More coming...
+    }
+
     public void parseMask() {
         int w = mask.image.getWidth();
 
@@ -108,9 +117,12 @@ public class Map {
         return collisions.contains(pos);
     }
 
-    public boolean isCompleted(Point pos) {
-        int half = objectSize / 2;
-        boolean value = goal.contains(pos.x + half, pos.y + half);
+    public boolean isCompleted(RectF ballHitbox) {
+
+        Rect ball = new Rect();
+        ballHitbox.round(ball);
+
+        boolean value  = Rect.intersects(goal.getHitbox(), ball);
         if(value) {
             goal.visible = false;
             goal.setPosition(0, 0); //To avoid fireing the event 1000 times
@@ -118,10 +130,13 @@ public class Map {
         return value;
     }
 
-    public boolean findsToken(Point pos) {
-        int half = objectSize / 2;
+    public boolean findsToken(RectF ballHitbox) {
+
+        Rect ball = new Rect();
+        ballHitbox.round(ball);
+
         for(Rect token: tokens) {
-            if(token.contains(pos.x + half , pos.y + half)) {
+            if(Rect.intersects(token, ball)) {
                 tokens.remove(token);
                 foundTokens++;
                 return true;

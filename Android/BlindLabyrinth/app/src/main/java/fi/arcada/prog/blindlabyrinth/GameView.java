@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -282,7 +283,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
         }
         else {  //Runs normally when countdown is done in darkness mode.
-            if(map.isCompleted(ball.getPosition())) {
+            if(map.isCompleted(ball.getSize())) {
                 //Hooray, move to another screen or something... This is the "End event trigger"
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putInt("score", prefs.getInt("score", 0) + (multiplierOne * multiplierTwo));
@@ -295,7 +296,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 Log.v("END", "The ball is in the goal");
             }
 
-            if(map.findsToken(ball.getPosition())) {
+            if(map.findsToken(ball.getSize())) {
                 //Yay, we found a token, add the counter graphics and play a sound
 
                 tokensPathList.add(new Path(){{

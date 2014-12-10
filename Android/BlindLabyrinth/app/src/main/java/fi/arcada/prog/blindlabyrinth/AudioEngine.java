@@ -6,6 +6,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -19,8 +20,6 @@ import java.util.Map;
 public class AudioEngine extends Service {
     private final IBinder mBinder = new AudioBinder();
 
-    private final Random mGenerator = new Random();
-
     protected MediaPlayer musicPlayer = new MediaPlayer();
     protected SoundPool soundPlayer;
     protected float soundVolume = (float) 1.0;
@@ -28,6 +27,19 @@ public class AudioEngine extends Service {
     protected HashMap<String, Integer> sounds = new HashMap<String, Integer>();
     protected HashMap<String, Integer> music;
     protected Iterator musicIterator;
+
+    protected Random randomGenerator;
+
+    protected int moveId;
+    protected int moveDuration; //The normal duration
+    protected int moveTime; //The calculated duration
+    protected boolean movePlaying = false;
+    final Handler moveHandler = new Handler();
+    protected int movementMax = 7;
+
+    final Handler wallHandler = new Handler();
+    protected boolean wallPlay = true;
+
 
     public class AudioBinder extends Binder {
         AudioEngine getService() {
@@ -61,8 +73,16 @@ public class AudioEngine extends Service {
 
         HashMap<String, Integer> sounds = new HashMap<String, Integer>();
         sounds.put("move", R.raw.rollin);
+        sounds.put("wall", R.raw.wall);
         sounds.put("token",R.raw.tokenfound);
         sounds.put("levelcompleted",R.raw.levelcompleted);
+
+        MediaPlayer temp = MediaPlayer.create(App.getContext(), sounds.get("move"));
+        moveDuration = temp.getDuration();
+        temp.release();
+        temp = null;
+
+        randomGenerator = new Random();
 
         init(music, sounds);
         playMusic();
@@ -137,5 +157,50 @@ public class AudioEngine extends Service {
         if(id != 0) {
             soundPlayer.play(id, soundVolume, soundVolume, 0, 0, rate);
         }
+    }
+
+    public void playSoundRR(String tag) { //Random Rate
+        float rate = (randomGenerator.nextFloat() * (float)1.5) + (float)0.5;
+        playSound(tag, rate);
+    }
+
+    public void playMove(int movement) {
+        if(movement < 0) movement *= -1;
+        if(movement < 2) {
+            soundPlayer.stop(moveId);
+            return;
+        }
+        float rate = (float)1.0 ;//(movement / movementMax) / 2;
+        float volume = soundVolume * (float)0.8;
+        Log.v("rate", Float.toString(rate));
+
+        if(movement > movementMax) movementMax = movement;
+        if(movePlaying) {
+            soundPlayer.setRate(moveId, rate);
+        } else {
+            moveId = soundPlayer.play(sounds.get("move"), volume, volume, 0, 0, rate);
+            moveTime = moveDuration * (int)rate;
+            movePlaying = true;
+            moveHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    movePlaying = false;
+                }
+            }, moveTime);
+        }
+    }
+
+    public void playWall() {
+        if(wallPlay) {
+            playSoundRR("wall");
+            wallPlay = false;
+        }
+        //stop the sound from replaying all the time
+        wallHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                wallPlay = true;
+            }
+        }, 100);
     }
 }
