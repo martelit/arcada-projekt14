@@ -33,10 +33,10 @@ import java.util.ArrayList;
 public class GameView extends View implements Runnable, SensorEventListener {
 
     //For holding accelerometer values in x and y axis, also a few new floats containing sets for original and fixed new values.
-    float acceleratorX = 0;
-    float acceleratorY = 0;
-    float[] accelerometerOriginalValues;
-    float[] accelerometerNewValues;
+    float acceleratorXOriginal = 0;
+    float acceleratorYOriginal = 0;
+    float acceleratorXNew = 0;
+    float acceleratorYNew = 0;
 
     boolean DEBUG_CONTROLS = false;
 
@@ -71,8 +71,6 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     public GameView(Context context) {
         super(context);
-
-        accelerometerOriginalValues = new float[2];
 
         blackPaint = new Paint();
         ballPath = new Path();
@@ -200,8 +198,8 @@ public class GameView extends View implements Runnable, SensorEventListener {
 		 	SENSOR_DELAY_NORMAL	rate (default) suitable for screen orientation changes
 		*/
 
-        Log.v("acceleratorX", "" + acceleratorX);
-        Log.v("acceleratorY", ""+acceleratorY);
+        //Log.v("acceleratorX", "" + acceleratorXNew);
+        //Log.v("acceleratorY", ""+acceleratorYNew);
 
 
         ctrl = new Controller(  BitmapFactory.decodeResource(context.getResources(), R.drawable.up),
@@ -342,7 +340,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
             map.draw(canvas);
             if(!DEBUG_CONTROLS) {
-                ball.move(acceleratorX, acceleratorY, map);
+                ball.move(acceleratorXNew, acceleratorYNew, map);
             } else {
                 Point d = ctrl.getDirection();
                 ball.move(d.x * 14, d.y * 14, map);
@@ -464,38 +462,34 @@ public class GameView extends View implements Runnable, SensorEventListener {
         if(event.sensor.getType()==Sensor.TYPE_ACCELEROMETER){
 
             //Assign original directions
-            accelerometerOriginalValues[0] = event.values[0];
-            accelerometerOriginalValues[1] = event.values[1];
+            acceleratorXOriginal = event.values[0];
+            acceleratorYOriginal = event.values[1];
 
             //Fix possible orientation problems.
             fixOrientationProblem();
-
-            //Assign new true values.
-            acceleratorX = accelerometerNewValues[0];
-            acceleratorY = accelerometerNewValues[1];
         }
     }
 
     public void fixOrientationProblem() {
         if(rotationIndex == 0) {
             //Should be standard portrait mode.
-            accelerometerNewValues[0] = accelerometerOriginalValues[0];
-            accelerometerNewValues[1] = accelerometerOriginalValues[1];
+            acceleratorXNew = acceleratorXOriginal;
+            acceleratorYNew = acceleratorYOriginal;
         }
         else if(rotationIndex == 1) {
             //Hopefully counter clockwise landscape mode (in other words the one we are mainly looking to fix here that caused the problem).
-            accelerometerNewValues[0] = accelerometerOriginalValues[1];
-            accelerometerNewValues[1] = (-1)*accelerometerOriginalValues[0];
+            acceleratorXNew = acceleratorYOriginal;
+            acceleratorYNew = (-1)*acceleratorXOriginal;
         }
         else if(rotationIndex == 2) {
             //Should be reverse portrait mode.
-            accelerometerNewValues[0] = (-1)*accelerometerOriginalValues[0];
-            accelerometerNewValues[1] = (-1)*accelerometerOriginalValues[1];
+            acceleratorXNew = (-1)*acceleratorXOriginal;
+            acceleratorYNew = (-1)*acceleratorYOriginal;
         }
         else if(rotationIndex == 3) {
             //Hopefully clockwise landscape mode.
-            accelerometerNewValues[0] = (-1)*accelerometerOriginalValues[1];
-            accelerometerNewValues[1] = accelerometerOriginalValues[0];
+            acceleratorXNew = (-1)*acceleratorYOriginal;
+            acceleratorYNew = acceleratorXOriginal;
         }
         else {
             Log.v("rotationIndex fail", "rotationIndex wasn't 0-3, but instead "+rotationIndex);
