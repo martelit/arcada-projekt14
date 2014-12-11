@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 
 public class Settings extends GameActivity {
-    public static final String PREFS_NAME = "blindLabyrinthPref";
+    public static final String PREFS_NAME = Cache.SETTINGS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +55,7 @@ public class Settings extends GameActivity {
             public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
                 SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
+                Cache.getInstance().Audio.setSound(isChecked);
                 if(isChecked) {
                     editor.putInt("sound", 1);
                     editor.commit();
@@ -70,6 +71,7 @@ public class Settings extends GameActivity {
             public void onCheckedChanged(CompoundButton buttonView,boolean isChecked) {
                 SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = prefs.edit();
+                Cache.getInstance().Audio.setMusic(isChecked);
                 if(isChecked) {
                     editor.putInt("music", 1);
                     editor.commit();

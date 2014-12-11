@@ -3,13 +3,11 @@ package fi.arcada.prog.blindlabyrinth;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -18,7 +16,7 @@ import java.util.HashSet;
 
 public class Map {
     protected Graphic mask;
-    protected Graphic skin;
+    protected Graphic background;
     protected Graphic goal;
     protected Bitmap tokenBitmap;
 
@@ -30,13 +28,16 @@ public class Map {
     protected int maxTokens = 0;
     protected int foundTokens = 0;
 
-    int mapPadding = 20; //no idea how to calculate this in a dynamic manner
+    int mapPadding;
     public int objectSize; //ie token/goal
     int mode = 0;
 
-    public Map(Bitmap maskImage, Bitmap skinImage, Bitmap goalImage, Bitmap tokenImage, int mapSize, int mapMode) {
-        size = mapSize;
+    protected int wallColor;
+
+    public Map(Bitmap maskImage, Bitmap backgroundImage, Bitmap goalImage, Bitmap tokenImage, int width, int height, int mapMode, int wallColor) {
+        size = width;
         mode = mapMode;
+        this.wallColor = wallColor;
         switch(mode) {
             case 1:
                 objectSize = size / 25;
@@ -51,15 +52,21 @@ public class Map {
                 objectSize = size / 35;
                 break;
         }
+        mapPadding = (height / 2) - (width / 2);
+
 
         tokenBitmap = tokenImage;
 
         mask = new Graphic(maskImage);
-        skin = new Graphic(skinImage);
+        background = new Graphic(backgroundImage);
         goal = new Graphic(goalImage);
 
         mask.setSize(size, size);
-        skin.setSize(size, size);
+        mask.setPosition(0, mapPadding);
+
+        background.setSize(size, size);
+        background.setPosition(0, mapPadding);
+
         goal.setSize(objectSize * 2, objectSize * 2);
 
         parseMask();
@@ -67,7 +74,7 @@ public class Map {
 
     public void release() {
         mask.release();
-        skin.release();
+        background.release();
         goal.release();
 
         //More coming...
@@ -76,15 +83,18 @@ public class Map {
     public void parseMask() {
         int w = mask.image.getWidth();
 
+        Bitmap foreground = Bitmap.createBitmap(w, w, mask.image.getConfig());
+
         for(int i = 0; i < w; i++) {
             for(int j = 0; j < w; j++) {
                 int pixel = mask.image.getPixel(i, j);
 
                 int x = i;
-                int y = j;
+                int y = mapPadding + j;
 
                 if(pixel == Color.BLACK) {
                     collisions.add(new Point(x, y));
+                     foreground.setPixel(i, j, wallColor);
 
                 } else if(start.equals(0, 0) && pixel == Color.GREEN) {
                     start.set(x, y);
@@ -100,6 +110,8 @@ public class Map {
                 }
             }
         }
+        mask.image.recycle();
+        mask.image = foreground;
     }
 
     public void addToken(int x, int y) {
@@ -165,7 +177,8 @@ public class Map {
     }
 
     public void draw(Canvas c) {
-        skin.draw(c);
+        background.draw(c);
+        mask.draw(c);
 
         for(Rect token: tokens) {
             c.drawBitmap(tokenBitmap, null, token, null);

@@ -19,4 +19,6 @@ public class Cache {
     public boolean aeBound = false;
 
     public boolean inFocus = false; //is our application in focus? [Used by GameActivity]
+
+    final static String SETTINGS = "blindLabyrinthPref";
 }

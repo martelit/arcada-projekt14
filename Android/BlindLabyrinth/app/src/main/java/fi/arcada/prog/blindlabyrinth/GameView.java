@@ -81,7 +81,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
         countdownIsNotCreated = true;
 
         //Information about settings are stored in a SharedPreferences file called "blindLabyrinthPref".
-        prefs = context.getSharedPreferences("blindLabyrinthPref", 0);
+        prefs = context.getSharedPreferences(Cache.SETTINGS, 0);
 
         //Selects the ball depending on what settings have been given.
         if(prefs.getString("ball", "nothing").equals("ball1")) {
@@ -180,7 +180,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
         Point displaySize = new Point();
         display.getSize(displaySize);
 
-        map = new Map(mask, skin, goal, token, displaySize.x, mode);
+        map = new Map(mask, skin, goal, token, displaySize.x, displaySize.y, mode, Color.DKGRAY);
 
         //This line has been somewhat changed so it can be used in GameView (context added before a few things).
         sensorManager=(SensorManager) context.getSystemService(Context.SENSOR_SERVICE);

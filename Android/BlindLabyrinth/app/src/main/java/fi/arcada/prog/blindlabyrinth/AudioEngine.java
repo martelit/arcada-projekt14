@@ -2,6 +2,7 @@ package fi.arcada.prog.blindlabyrinth;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
@@ -20,7 +21,7 @@ import java.util.Map;
 public class AudioEngine extends Service {
     private final IBinder mBinder = new AudioBinder();
 
-    protected MediaPlayer musicPlayer = new MediaPlayer();
+    protected MediaPlayer musicPlayer;
     protected SoundPool soundPlayer;
     protected float soundVolume = (float) 1.0;
 
@@ -39,6 +40,11 @@ public class AudioEngine extends Service {
 
     final Handler wallHandler = new Handler();
     protected boolean wallPlay = true;
+
+    protected boolean musicOn = true;
+    protected boolean soundOn = true;
+
+    protected boolean hasPlayed = false;
 
 
     public class AudioBinder extends Binder {
@@ -65,40 +71,49 @@ public class AudioEngine extends Service {
 
 
     public AudioEngine() {
-        HashMap<String, Integer> music = new HashMap<String, Integer>();
+        music = new HashMap<String, Integer>();
         music.put("music0", R.raw.qcl1);
         music.put("music1", R.raw.qcl2);
         music.put("music2", R.raw.qcl0);
 
+        HashMap<String, Integer> soundRes = new HashMap<String, Integer>();
+        soundRes.put("move", R.raw.rollin);
+        soundRes.put("wall", R.raw.wall);
+        soundRes.put("token", R.raw.tokenfound);
+        soundRes.put("levelcompleted", R.raw.levelcompleted);
 
-        HashMap<String, Integer> sounds = new HashMap<String, Integer>();
-        sounds.put("move", R.raw.rollin);
-        sounds.put("wall", R.raw.wall);
-        sounds.put("token",R.raw.tokenfound);
-        sounds.put("levelcompleted",R.raw.levelcompleted);
-
-        MediaPlayer temp = MediaPlayer.create(App.getContext(), sounds.get("move"));
+        MediaPlayer temp = MediaPlayer.create(App.getContext(), soundRes.get("move"));
         moveDuration = temp.getDuration();
         temp.release();
         temp = null;
 
         randomGenerator = new Random();
 
-        init(music, sounds);
-        playMusic();
-    }
-
-    public void init(HashMap<String, Integer> musicRes, HashMap<String, Integer> soundRes) {
         soundPlayer = new SoundPool(soundRes.size(), AudioManager.STREAM_MUSIC, 0);
-        setMusicVolume((float)0.8);
         for (Map.Entry<String, Integer> entry : soundRes.entrySet()) {
             int id = soundPlayer.load(App.getContext(), entry.getValue(), 1);
             sounds.put(entry.getKey(), id);
         }
 
-        music = musicRes;
+        //Reading music/sound settings here
+        SharedPreferences prefs = App.getContext().getSharedPreferences(Cache.SETTINGS, 0);
+        musicOn = (prefs.getInt("music", 1) == 1);
+        soundOn = (prefs.getInt("sound", 1) == 1);
 
+        reset();
+    }
+
+    public void reset() {
         resetIterator();
+
+        musicPlayer = new MediaPlayer();
+        setMusicVolume((float)0.8);
+
+        if(musicOn) playMusic();
+    }
+
+    public void release() {
+
     }
 
     public void onPause() {
@@ -106,7 +121,9 @@ public class AudioEngine extends Service {
     }
 
     public void onPlay() {
-        if(musicPlayer != null) musicPlayer.start();
+        if(musicOn && musicPlayer != null) {
+            musicPlayer.start();
+        }
     }
 
     public void setMusicVolume(float vol) {
@@ -122,11 +139,13 @@ public class AudioEngine extends Service {
     }
 
     public void playMusic(String tag) {
+        hasPlayed = true;
         Integer id = music.get(tag);
         if(id != 0) {
-            musicPlayer.stop();
-            musicPlayer.release();
-            musicPlayer = musicPlayer.create(App.getContext(), id);
+            if(musicPlayer != null) {
+                musicPlayer.release();
+            }
+            musicPlayer = MediaPlayer.create(App.getContext(), id);
             musicPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
@@ -153,6 +172,7 @@ public class AudioEngine extends Service {
     }
 
     public void playSound(String tag, float rate) {
+        if(!soundOn) return;
         Integer id = sounds.get(tag);
         if(id != 0) {
             soundPlayer.play(id, soundVolume, soundVolume, 0, 0, rate);
@@ -165,6 +185,7 @@ public class AudioEngine extends Service {
     }
 
     public void playMove(int movement) {
+        if(!soundOn) return;
         if(movement < 0) movement *= -1;
         if(movement < 2) {
             soundPlayer.stop(moveId);
@@ -202,5 +223,23 @@ public class AudioEngine extends Service {
                 wallPlay = true;
             }
         }, 100);
+    }
+
+    public void setMusic(boolean on) {
+        musicOn = on;
+        if(on) {
+           if(hasPlayed) {
+                onPlay();
+            } else {
+                reset();
+            }
+
+        } else {
+            onPause();
+        }
+    }
+
+    public void setSound(boolean on) {
+        soundOn = on;
     }
 }
