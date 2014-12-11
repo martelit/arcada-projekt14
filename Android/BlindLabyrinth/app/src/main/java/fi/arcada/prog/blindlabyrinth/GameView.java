@@ -32,11 +32,11 @@ import java.util.ArrayList;
 
 public class GameView extends View implements Runnable, SensorEventListener {
 
-    //For holding accelerometer values in x, y and z axis.
-    //Z can be ignored unless someone wanted to do the project in 3d and use all dimensions.
+    //For holding accelerometer values in x and y axis, also a few new floats containing sets for original and fixed new values.
     float acceleratorX = 0;
     float acceleratorY = 0;
-    float acceleratorZ = 0;
+    float[] accelerometerOriginalValues;
+    float[] accelerometerNewValues;
 
     boolean DEBUG_CONTROLS = false;
 
@@ -66,8 +66,13 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     private SensorManager sensorManager;
 
+    //Testing to fix bug with landscape as default mode.
+    public int rotationIndex;
+
     public GameView(Context context) {
         super(context);
+
+        accelerometerOriginalValues = new float[2];
 
         blackPaint = new Paint();
         ballPath = new Path();
@@ -203,6 +208,9 @@ public class GameView extends View implements Runnable, SensorEventListener {
                                 BitmapFactory.decodeResource(context.getResources(), R.drawable.right),
                                 BitmapFactory.decodeResource(context.getResources(), R.drawable.down),
                                 BitmapFactory.decodeResource(context.getResources(), R.drawable.left));
+
+        //Testing to fix bug with landscape as default mode. (0-3 depending on rotation, 0 = 0 grades, 1 = 90, 2 = 180, 3 = 270) (expected to return either 1 or 3 with landscape mode devices, 0 with portrait mode ones)
+        rotationIndex = display.getRotation();
 
         startGame();
     }
@@ -455,11 +463,42 @@ public class GameView extends View implements Runnable, SensorEventListener {
         // check sensor type
         if(event.sensor.getType()==Sensor.TYPE_ACCELEROMETER){
 
-            // assign directions
-            acceleratorX=event.values[0];
-            acceleratorY=event.values[1];
-            acceleratorZ=event.values[2];
+            //Assign original directions
+            accelerometerOriginalValues[0] = event.values[0];
+            accelerometerOriginalValues[1] = event.values[1];
+
+            //Fix possible orientation problems.
+            fixOrientationProblem();
+
+            //Assign new true values.
+            acceleratorX = accelerometerNewValues[0];
+            acceleratorY = accelerometerNewValues[1];
         }
     }
 
+    public void fixOrientationProblem() {
+        if(rotationIndex == 0) {
+            //Should be standard portrait mode.
+            accelerometerNewValues[0] = accelerometerOriginalValues[0];
+            accelerometerNewValues[1] = accelerometerOriginalValues[1];
+        }
+        else if(rotationIndex == 1) {
+            //Hopefully counter clockwise landscape mode (in other words the one we are mainly looking to fix here that caused the problem).
+            accelerometerNewValues[0] = accelerometerOriginalValues[1];
+            accelerometerNewValues[1] = (-1)*accelerometerOriginalValues[0];
+        }
+        else if(rotationIndex == 2) {
+            //Should be reverse portrait mode.
+            accelerometerNewValues[0] = (-1)*accelerometerOriginalValues[0];
+            accelerometerNewValues[1] = (-1)*accelerometerOriginalValues[1];
+        }
+        else if(rotationIndex == 3) {
+            //Hopefully clockwise landscape mode.
+            accelerometerNewValues[0] = (-1)*accelerometerOriginalValues[1];
+            accelerometerNewValues[1] = accelerometerOriginalValues[0];
+        }
+        else {
+            Log.v("rotationIndex fail", "rotationIndex wasn't 0-3, but instead "+rotationIndex);
+        }
+    }
 }
