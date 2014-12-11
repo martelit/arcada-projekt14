@@ -2,6 +2,8 @@ package fi.arcada.prog.blindlabyrinth;
 
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
@@ -9,6 +11,12 @@ import android.util.Log;
 public class GameActivity extends Activity {
 
     final Handler handler = new Handler();
+
+    @Override
+    protected void onCreate(Bundle b) {
+        super.onCreate(b);
+        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
 
     @Override
     protected void onResume() {

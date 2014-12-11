@@ -26,7 +26,7 @@ public class AudioEngine extends Service {
     protected float soundVolume = (float) 1.0;
 
     protected HashMap<String, Integer> sounds = new HashMap<String, Integer>();
-    protected HashMap<String, Integer> music;
+    protected LinkedHashMap<String, Integer> music;
     protected Iterator musicIterator;
 
     protected Random randomGenerator;
@@ -71,7 +71,7 @@ public class AudioEngine extends Service {
 
 
     public AudioEngine() {
-        music = new HashMap<String, Integer>();
+        music = new LinkedHashMap<String, Integer>();
         music.put("music0", R.raw.qcl1);
         music.put("music1", R.raw.qcl2);
         music.put("music2", R.raw.qcl0);
@@ -96,7 +96,7 @@ public class AudioEngine extends Service {
         }
 
         //Reading music/sound settings here
-        SharedPreferences prefs = App.getContext().getSharedPreferences(Cache.SETTINGS, 0);
+        SharedPreferences prefs = Cache.getInstance().getPref();
         musicOn = (prefs.getInt("music", 1) == 1);
         soundOn = (prefs.getInt("sound", 1) == 1);
 
@@ -140,6 +140,7 @@ public class AudioEngine extends Service {
 
     public void playMusic(String tag) {
         hasPlayed = true;
+
         Integer id = music.get(tag);
         if(id != 0) {
             if(musicPlayer != null) {
@@ -153,11 +154,16 @@ public class AudioEngine extends Service {
                 }
             });
         }
+
     }
 
     private void playNext() {
         if(!musicIterator.hasNext()) resetIterator();
         Map.Entry<String, Integer> entry = (Map.Entry) musicIterator.next();
+        if(Cache.getInstance().getPref().getInt("lastsong", 0) == entry.getValue()) {
+            playNext();
+            return;
+        }
         playMusic(entry.getKey());
         musicPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
@@ -165,6 +171,9 @@ public class AudioEngine extends Service {
                 playNext();
             }
         });
+        SharedPreferences.Editor e = Cache.getInstance().getEdit();
+        e.putInt("lastsong", entry.getValue());
+        e.commit();
     }
 
     public void resetIterator() {
