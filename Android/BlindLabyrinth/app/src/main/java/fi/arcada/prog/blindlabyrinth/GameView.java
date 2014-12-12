@@ -472,24 +472,20 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     public void fixOrientationProblem() {
         if(rotationIndex == 0) {
-            //Should be standard portrait mode.
             acceleratorXNew = acceleratorXOriginal;
             acceleratorYNew = acceleratorYOriginal;
         }
         else if(rotationIndex == 1) {
-            //Hopefully counter clockwise landscape mode (in other words the one we are mainly looking to fix here that caused the problem).
-            acceleratorXNew = acceleratorYOriginal;
-            acceleratorYNew = (-1)*acceleratorXOriginal;
+            acceleratorXNew = (-1)*acceleratorYOriginal;
+            acceleratorYNew = acceleratorXOriginal;
         }
         else if(rotationIndex == 2) {
-            //Should be reverse portrait mode.
             acceleratorXNew = (-1)*acceleratorXOriginal;
             acceleratorYNew = (-1)*acceleratorYOriginal;
         }
         else if(rotationIndex == 3) {
-            //Hopefully clockwise landscape mode.
-            acceleratorXNew = (-1)*acceleratorYOriginal;
-            acceleratorYNew = acceleratorXOriginal;
+            acceleratorXNew = acceleratorYOriginal;
+            acceleratorYNew = (-1)*acceleratorXOriginal;
         }
         else {
             Log.v("rotationIndex fail", "rotationIndex wasn't 0-3, but instead "+rotationIndex);
