@@ -47,7 +47,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
     Paint blackPaint;
     Path ballPath;
     Path tokensPath;
-    ArrayList<Path> tokensPathList;
+    ArrayList<Point> tokensPointList;
     Region region;
     SharedPreferences prefs;
     String gameMode;
@@ -75,7 +75,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
         blackPaint = new Paint();
         ballPath = new Path();
         tokensPath = new Path();
-        tokensPathList = new ArrayList<Path>();
+        tokensPointList = new ArrayList<Point>();
         region = new Region();
 
         blackPaint.setColor(Color.BLACK);
@@ -220,7 +220,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
         createThreads();
     }
 
-    //Sets a few things to right values if trailblazer or glowstick is chosen as mode.
+    //Sets a few things to right values if trailblazer, glowstick or darkness is chosen as mode.
     private void setGradientMode() {
         if(gameMode.equals("trailblazer")) {
             ball.setGradientFadeLengthTrailblazer();
@@ -229,6 +229,10 @@ public class GameView extends View implements Runnable, SensorEventListener {
         else if(gameMode.equals("glowstick")) {
             ball.setGradientFadeLengthGlowstick();
             ball.setGradientFadeColorGlowstick();
+        }
+        else if(gameMode.equals("darkness")) {
+            ball.setGradientFadeLengthDarkness();
+            ball.setGradientFadeColorDarkness();
         }
     }
 
@@ -308,9 +312,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
             if(map.findsToken(ball.getSize())) {
                 //Yay, we found a token, add the counter graphics and play a sound
 
-                tokensPathList.add(new Path(){{
-                    addCircle(ball.getPosition().x+ball.midPointLength, ball.getPosition().y+ball.midPointLength, ball.midPointLength+ball.width*4, Path.Direction.CW);
-                }});
+                tokensPointList.add(new Point(ball.xPosition+ball.midPointLength, ball.yPosition+ball.midPointLength));
 
                 new CountDownTimer(5000, 1000) {
 
@@ -319,10 +321,10 @@ public class GameView extends View implements Runnable, SensorEventListener {
                     }
 
                     public void onFinish() {
-                        if(!tokensPathList.isEmpty()) {
-                            for (int a = 0; a < tokensPathList.size(); a++) {
-                                if(!(tokensPathList.get(a) == null)) {
-                                    tokensPathList.remove(a);
+                        if(!tokensPointList.isEmpty()) {
+                            for (int a = 0; a < tokensPointList.size(); a++) {
+                                if(!(tokensPointList.get(a) == null)) {
+                                    tokensPointList.remove(a);
                                     break;
                                 }
                             }
@@ -353,17 +355,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
             //Decides what else is drawn depending on the game mode.
             if(gameMode.equals("trailblazer")) {
 
-                //If a token has been found and countdown hasn't ended, the list won't be empty and this runs, drawing the round ring(s) on the screen depending on how many paths the list has at that moment.
-                if(!tokensPathList.isEmpty()) {
-                    //Log.v("tokensPathList", "Not empty now!");
-                    tokensPath.rewind();
-
-                    for(Path tokenPathFromList : tokensPathList) {
-                        tokensPath.addPath(tokenPathFromList);
-                        //Log.v("tokensPath content", ""+tokensPath.toString());
-                    }
-                    canvas.clipPath(tokensPath, Region.Op.DIFFERENCE);
-                }
+                ball.setGradientShaderTrailblazer(tokensPointList);
 
                 canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), ball.getGradient());
 
@@ -374,10 +366,19 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 ballPath = region.getBoundaryPath();
 
                 //Makes a path in the form of a circle around the ball, which will be used as an excluded part when drawing the black rectangle filling the screen.
-                ballPath.addCircle(ball.getPosition().x+ball.midPointLength, ball.getPosition().y+ball.midPointLength, ball.midPointLength+ball.width*2, Path.Direction.CW);
+                ballPath.addCircle(ball.getPosition().x+ball.midPointLength, ball.getPosition().y+ball.midPointLength, ball.gradientFadeLength, Path.Direction.CW);
 
                 //This is the line that makes so the path isn't involved as a part of the black rectangle.
                 canvas.clipPath(ballPath, Region.Op.DIFFERENCE);
+
+                if(!(tokensPointList.isEmpty())) {
+                    for(final Point p : tokensPointList) {
+                        Path path = new Path();
+                        path.addCircle(p.x, p.y, ball.tokenGradientFadeLength, Path.Direction.CW);
+                        canvas.clipPath(path, Region.Op.DIFFERENCE);
+                        //canvas.clipPath(new Path(){{addCircle(p.x, p.y, ball.tokenGradientFadeLength, Path.Direction.CW);}}, Region.Op.DIFFERENCE);
+                    }
+                }
 
                 //Fills the entire screen with a black rectangle.
                 canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
@@ -385,45 +386,15 @@ public class GameView extends View implements Runnable, SensorEventListener {
             }
             else if(gameMode.equals("glowstick")) {
 
-                //If a token has been found and countdown hasn't ended, the list won't be empty and this runs, drawing the round ring(s) on the screen depending on how many paths the list has at that moment.
-                if(!tokensPathList.isEmpty()) {
-                    //Log.v("tokensPathList", "Not empty now!");
-                    tokensPath.rewind();
-
-                    for(Path tokenPathFromList : tokensPathList) {
-                        tokensPath.addPath(tokenPathFromList);
-                        //Log.v("tokensPath content", ""+tokensPath.toString());
-                    }
-                    canvas.clipPath(tokensPath, Region.Op.DIFFERENCE);
-                }
+                ball.setGradientShaderGlowstick(tokensPointList);
 
                 canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), ball.getGradient());
-
-                //As of the latest solution nothing needs to be done here. Saving code for now in case of reverting to old model.
-
-                //ballPath.addCircle(ball.getPosition().x+ball.width/2, ball.getPosition().y+ball.height/2, ball.midPointLength+ball.width, Path.Direction.CW);
-                //canvas.clipPath(ballPath, Region.Op.DIFFERENCE);
-                //canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
-
-                //Resets the path, since it shouldn't leave a trail behind in this mode and even if it should, adding new circles to a path for every little movement of the ball is a huge performance issue.
-                //ballPath.rewind();
             }
             else if(gameMode.equals("darkness")) {
 
-                //If a token has been found and countdown hasn't ended, the list won't be empty and this runs, drawing the round ring(s) on the screen depending on how many paths the list has at that moment.
-                if(!tokensPathList.isEmpty()) {
-                    //Log.v("tokensPathList", "Not empty now!");
-                    tokensPath.rewind();
+                ball.setGradientShaderDarknessMode(tokensPointList);
 
-                    for(Path tokenPathFromList : tokensPathList) {
-                        tokensPath.addPath(tokenPathFromList);
-                        //Log.v("tokensPath content", ""+tokensPath.toString());
-                    }
-                    canvas.clipPath(tokensPath, Region.Op.DIFFERENCE);
-                }
-
-                //Fills the whole screen with a black rectangle.
-                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), blackPaint);
+                canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), ball.getGradient());
             }
             else if(gameMode.equals("lights_on")) {
                 //Nothing really needs to be done here, at least not for now.

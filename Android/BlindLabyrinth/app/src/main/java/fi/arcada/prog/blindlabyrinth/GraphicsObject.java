@@ -2,8 +2,10 @@ package fi.arcada.prog.blindlabyrinth;
 
 
 import android.graphics.Color;
+import android.graphics.ComposeShader;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
@@ -46,6 +48,12 @@ public class GraphicsObject {
     int midPointLength;
     int gradientLength;
     int gradientFadeLength;
+    int tokenGradientFadeLength;
+    Shader ballShader;
+    Shader oneTokenShader;
+    ComposeShader CS;
+    Boolean firstPoint;
+    Boolean firstComposePoint;
 
     //Variables for preemptiveCollisionCheck. Probably only a temporary storing place.
     boolean collisionsStarted;
@@ -132,8 +140,9 @@ public class GraphicsObject {
         gPaintFade = new Paint();
         gPaintFade.setColor(Color.BLACK);
 
-        //Default value to avoid null value error.
+        //Default values for different gradient lengths (radius for the circles) to avoid null value error.
         gradientFadeLength = midPointLength+width*2;
+        tokenGradientFadeLength = midPointLength+width*5;
     }
 
     //Call this if you need the positional data/size for a rectangle formed object.
@@ -158,23 +167,123 @@ public class GraphicsObject {
         return new Point(xPosition, yPosition);
     }
 
-    public void setGradientShader() {
-        gPaint.setShader(new RadialGradient(xPosition+midPointLength, yPosition+midPointLength, gradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP));
+    public void setGradientShaderGlowstick(ArrayList<Point> pointsForShaders) {
+
+        ballShader = new RadialGradient(xPosition+midPointLength, yPosition+midPointLength, gradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP);
+
+        if(pointsForShaders.isEmpty()) {
+            gPaint.setShader(ballShader);
+        }
+        else {
+
+            firstPoint = true;
+
+            for(Point p : pointsForShaders) {
+                if(firstPoint) {
+
+                    CS = new ComposeShader(ballShader, new RadialGradient(p.x, p.y, tokenGradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP), PorterDuff.Mode.DST_IN);
+
+                    firstPoint = false;
+                }
+                else {
+
+                    CS = new ComposeShader(CS, new RadialGradient(p.x, p.y, tokenGradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP), PorterDuff.Mode.DST_IN);
+                }
+            }
+
+            gPaint.setShader(CS);
+        }
+    }
+
+    public void setGradientShaderTrailblazer(ArrayList<Point> pointsForShaders) {
+
+        ballShader = new RadialGradient(xPosition+midPointLength, yPosition+midPointLength, gradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP);
+
+        if(pointsForShaders.isEmpty()) {
+            gPaint.setShader(ballShader);
+        }
+        else {
+
+            firstPoint = true;
+
+            for(Point p : pointsForShaders) {
+                if(firstPoint) {
+
+                    CS = new ComposeShader(ballShader, new RadialGradient(p.x, p.y, tokenGradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP), PorterDuff.Mode.SRC_IN);
+
+                    firstPoint = false;
+                }
+                else {
+
+                    CS = new ComposeShader(CS, new RadialGradient(p.x, p.y, tokenGradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP), PorterDuff.Mode.SRC_IN);
+                }
+            }
+
+            gPaint.setShader(CS);
+        }
+    }
+
+    public void setGradientShaderDarknessMode(ArrayList<Point> pointsForShaders) {
+
+        if(pointsForShaders.isEmpty()) {
+            gPaint.setShader(new RadialGradient(0, 0, 1, gPaintFade.getColor(), gPaintFade.getColor(), Shader.TileMode.CLAMP));
+        }
+        else {
+
+            firstPoint = true;
+            firstComposePoint = true;
+
+            for(Point p : pointsForShaders) {
+                if(firstPoint) {
+
+                    oneTokenShader = new RadialGradient(p.x, p.y, tokenGradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP);
+
+                    if(pointsForShaders.size() == 1) {
+                        gPaint.setShader(oneTokenShader);
+                        break;
+                    }
+                    firstPoint = false;
+                }
+                else {
+
+                    if(firstComposePoint) {
+                        CS = new ComposeShader(oneTokenShader, new RadialGradient(p.x, p.y, tokenGradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP), PorterDuff.Mode.DST_IN);
+
+                        firstComposePoint = false;
+                    }
+                    else {
+                        CS = new ComposeShader(CS, new RadialGradient(p.x, p.y, tokenGradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP), PorterDuff.Mode.DST_IN);
+                    }
+                }
+
+                gPaint.setShader(CS);
+            }
+        }
     }
 
     public void setGradientFadeLengthTrailblazer() {
         gradientFadeLength = midPointLength+width*2;
+        tokenGradientFadeLength = (int) (midPointLength+width*4.7);
     }
 
     public void setGradientFadeLengthGlowstick() {
         gradientFadeLength = (int) (midPointLength+width*2.2);
+        tokenGradientFadeLength = midPointLength+width*5;
+    }
+
+    public void setGradientFadeLengthDarkness() {
+        tokenGradientFadeLength = midPointLength+width*5;
     }
 
     public void setGradientFadeColorTrailblazer() {
-        gPaintFade.setColor(Color.parseColor("#99000000"));
+        gPaintFade.setColor(Color.parseColor("#E1000000"));
     }
 
     public void setGradientFadeColorGlowstick() {
+        gPaintFade.setColor(Color.BLACK);
+    }
+
+    public void setGradientFadeColorDarkness() {
         gPaintFade.setColor(Color.BLACK);
     }
 }

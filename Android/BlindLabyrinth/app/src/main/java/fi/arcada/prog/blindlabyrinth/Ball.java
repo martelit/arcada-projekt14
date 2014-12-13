@@ -199,11 +199,6 @@ public class Ball extends GraphicsObject {
 
         //The position of the ball is set here, based on what has happened to xPosition and yPosition before.
         updateRect();
-
-        //Same for glow if it's on.
-        if(gradientMode) {
-            setGradientShader();
-        }
     }
 
     //Method to use in conjunction with the acceleration formula to get values for the ball's movement.
@@ -393,6 +388,7 @@ public class Ball extends GraphicsObject {
 
                         if(kTest <= k2+0.0001 && kTest >= k2-0.0001) {
                             //This should never run.
+                            Log.v("Wrong if reached", "This was never supposed to happen...");
                         }
                         else {
                             //New direction found.
