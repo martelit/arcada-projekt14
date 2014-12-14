@@ -40,9 +40,7 @@ public class GraphicsObject {
 
     protected ArrayList<Double> speedAndLeftoverDecimal;
 
-    protected boolean gradientMode;
-
-    //gradiant test
+    //gradient test
     Paint gPaint;
     Paint gPaintFade;
     int midPointLength;
@@ -90,12 +88,14 @@ public class GraphicsObject {
 
     //Variables for getNewSpeedVectorXAndY. Probably only a temporary storing place.
     ArrayList<Double> xAndY;
+    double xTotal;
+    double yTotal;
     double baseVector;
     double multiplier;
 
     //Constructor designed for usage when an object of Ball is created.
     //Initializes values.
-    public GraphicsObject(int ballXStartPosition, int ballYStartPosition, int ballWidth, int ballHeight, int color, GameView view, int BallXStartSpeed, int BallYStartSpeed, boolean gradientMode) {
+    public GraphicsObject(int ballXStartPosition, int ballYStartPosition, int ballWidth, int ballHeight, int color, GameView view, int BallXStartSpeed, int BallYStartSpeed) {
         xPosition = ballXStartPosition;
         yPosition = ballYStartPosition;
         width = ballWidth;
@@ -105,7 +105,6 @@ public class GraphicsObject {
         this.view = view;
         xSpeed = BallXStartSpeed;
         ySpeed = BallYStartSpeed;
-        this.gradientMode = gradientMode;
 
         //Checks if width and height are even and changes them to odd if they are (odd numbers work better with formulas since they have a true middle point in pixels)
         if ( (width & 1) == 0 ) width--;
@@ -121,12 +120,15 @@ public class GraphicsObject {
         //Gives length to the gradient.
         gradientLength = width*2;
 
+        //Gives initial speed to the ball.
         xSpeedDoubleVersion = (double) xSpeed;
         ySpeedDoubleVersion = (double) ySpeed;
 
+        //Imaginary distances are used to remember smaller distances than 1 pixel for more accurate movement over time.
         xDistanceImaginary = 0;
         yDistanceImaginary = 0;
 
+        //Used in collision calculations.
         ballCoordinatesList = new ArrayList<ArrayList>();
         collisionPointXAndYPos = new ArrayList<Integer>();
 
@@ -167,6 +169,7 @@ public class GraphicsObject {
         return new Point(xPosition, yPosition);
     }
 
+    //The following 3 methods are used to update the gradient paint once per frame, depending on which game mode is chosen of course.
     public void setGradientShaderGlowstick(ArrayList<Point> pointsForShaders) {
 
         ballShader = new RadialGradient(xPosition+midPointLength, yPosition+midPointLength, gradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP);
@@ -261,20 +264,22 @@ public class GraphicsObject {
         }
     }
 
+    //Used to set radius of visibility around both the ball and tokens. One for each game mode.
     public void setGradientFadeLengthTrailblazer() {
         gradientFadeLength = midPointLength+width*2;
-        tokenGradientFadeLength = (int) (midPointLength+width*4.7);
+        tokenGradientFadeLength = (int) (midPointLength+width*6.3);
     }
 
     public void setGradientFadeLengthGlowstick() {
         gradientFadeLength = (int) (midPointLength+width*2.2);
-        tokenGradientFadeLength = midPointLength+width*5;
+        tokenGradientFadeLength = midPointLength+width*7;
     }
 
     public void setGradientFadeLengthDarkness() {
-        tokenGradientFadeLength = midPointLength+width*5;
+        tokenGradientFadeLength = midPointLength+width*7;
     }
 
+    //Used to set color of the area outside the vision of the ball and tokens. One for each game mode.
     public void setGradientFadeColorTrailblazer() {
         gPaintFade.setColor(Color.parseColor("#E0000000"));
     }

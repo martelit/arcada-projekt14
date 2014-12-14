@@ -103,8 +103,6 @@ public class GameView extends View implements Runnable, SensorEventListener {
             ballBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ball);
         }
 
-        Log.v("pref stuff", prefs.getString("gameMode", "nothing"));
-
         //Selects the visibility depending on what settings have been given.
         if(prefs.getString("gameMode", "nothing").equals("trailblazer")) {
             gameMode = "trailblazer";
@@ -131,8 +129,6 @@ public class GameView extends View implements Runnable, SensorEventListener {
             gradientMode = false;
             multiplierOne = 1;
         }
-
-        Log.v("gameMode", gameMode);
 
         //Selects the size depending on what settings have been given.
         if(prefs.getString("size", "nothing").equals("small")) {
@@ -192,22 +188,12 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_GAME);
 
-		/*	More sensor speeds (taken from api docs)
-		    SENSOR_DELAY_FASTEST get sensor data as fast as possible
-		    SENSOR_DELAY_GAME	rate suitable for games
-		 	SENSOR_DELAY_NORMAL	rate (default) suitable for screen orientation changes
-		*/
-
-        //Log.v("acceleratorX", "" + acceleratorXNew);
-        //Log.v("acceleratorY", ""+acceleratorYNew);
-
-
         ctrl = new Controller(  BitmapFactory.decodeResource(context.getResources(), R.drawable.up),
                                 BitmapFactory.decodeResource(context.getResources(), R.drawable.right),
                                 BitmapFactory.decodeResource(context.getResources(), R.drawable.down),
                                 BitmapFactory.decodeResource(context.getResources(), R.drawable.left));
 
-        //Testing to fix bug with landscape as default mode. (0-3 depending on rotation, 0 = 0 grades, 1 = 90, 2 = 180, 3 = 270) (expected to return either 1 or 3 with landscape mode devices, 0 with portrait mode ones)
+        //Gives 0-3 depending on rotation (0 = 0 grades, 1 = 90, 2 = 180, 3 = 270) and is used in fixing the problem devices running landscape mode by default encountered.
         rotationIndex = display.getRotation();
 
         startGame();
@@ -215,7 +201,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     //Responsible for creating/launching/resetting everything needed for a new game to begin.
     public void startGame() {
-        ball = new Ball(map.startX(), map.startY(), map.ballSize(), map.ballSize(), Color.BLUE, this, ballXStartSpeed, ballYStartSpeed, gradientMode);
+        ball = new Ball(map.startX(), map.startY(), map.ballSize(), map.ballSize(), Color.BLUE, this, ballXStartSpeed, ballYStartSpeed);
         setGradientMode();
         createThreads();
     }
@@ -266,9 +252,11 @@ public class GameView extends View implements Runnable, SensorEventListener {
     {
         if(gameMode.equals("darkness") && countdownHasNotFinished) {    //Runs during the countdown of darkness mode.
             if(countdownIsNotCreated) {
-                new CountDownTimer(3500, 1000) {
+                new CountDownTimer(3200, 1000) {
 
                     public void onTick(long millisUntilFinished) {
+
+                        //If someone wanted to make something happen during different parts of the countdown, this would be the place.
                         if(millisUntilFinished == 3000) {
 
                         }
@@ -283,6 +271,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
                         }
                     }
 
+                    //Countdown is finished.
                     public void onFinish() {
                         countdownHasNotFinished = false;
                     }
@@ -291,6 +280,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 countdownIsNotCreated = false;
             }
 
+            //During countdown only the map and ball are displayed on the screen.
             map.draw(canvas);
             canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
 
@@ -312,14 +302,18 @@ public class GameView extends View implements Runnable, SensorEventListener {
             if(map.findsToken(ball.getSize())) {
                 //Yay, we found a token, add the counter graphics and play a sound
 
+                //For each token found a new point of the map is added to a list.
                 tokensPointList.add(new Point(ball.xPosition+ball.midPointLength, ball.yPosition+ball.midPointLength));
 
+                //Each token also gets its own countdown timer. When it's time is up, the position is emptied from the list.
                 new CountDownTimer(5000, 1000) {
 
+                    //Nothing is done during the countdown.
                     public void onTick(long millisUntilFinished) {
 
                     }
 
+                    //Countdown is finished.
                     public void onFinish() {
                         if(!tokensPointList.isEmpty()) {
                             for (int a = 0; a < tokensPointList.size(); a++) {
@@ -355,8 +349,10 @@ public class GameView extends View implements Runnable, SensorEventListener {
             //Decides what else is drawn depending on the game mode.
             if(gameMode.equals("trailblazer")) {
 
+                //Gives the gradient paint color based on current information about certain things like ball position and tokens activated.
                 ball.setGradientShaderTrailblazer(tokensPointList);
 
+                //Draws a rectangle covering the whole screen with the newly given gradient paint.
                 canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), ball.getGradient());
 
                 //Set the current path for ball as region.
@@ -371,12 +367,10 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 //This is the line that makes so the path isn't involved as a part of the black rectangle.
                 canvas.clipPath(ballPath, Region.Op.DIFFERENCE);
 
+                //Takes every point currently in the list from activating tokens and draws a circle around them, making that area not be affected by further drawing this time.
                 if(!(tokensPointList.isEmpty())) {
                     for(final Point p : tokensPointList) {
-                        Path path = new Path();
-                        path.addCircle(p.x, p.y, ball.tokenGradientFadeLength, Path.Direction.CW);
-                        canvas.clipPath(path, Region.Op.DIFFERENCE);
-                        //canvas.clipPath(new Path(){{addCircle(p.x, p.y, ball.tokenGradientFadeLength, Path.Direction.CW);}}, Region.Op.DIFFERENCE);
+                        canvas.clipPath(new Path(){{addCircle(p.x, p.y, ball.tokenGradientFadeLength, Path.Direction.CW);}}, Region.Op.DIFFERENCE);
                     }
                 }
 

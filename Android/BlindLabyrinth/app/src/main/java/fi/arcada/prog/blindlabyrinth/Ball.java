@@ -16,10 +16,10 @@ import java.util.ArrayList;
 public class Ball extends GraphicsObject {
 
     //Constructor for initializing values given to the ball.
-    public Ball(int ballXStartPosition, int ballYStartPosition, int ballWidth, int ballHeight, int color, GameView view, int BallXStartSpeed, int ballYStartSpeed, boolean gradientMode) {
+    public Ball(int ballXStartPosition, int ballYStartPosition, int ballWidth, int ballHeight, int color, GameView view, int BallXStartSpeed, int ballYStartSpeed) {
 
         //Runs the superclass version (in GraphicsObject) of the constructor.
-        super(ballXStartPosition, ballYStartPosition, ballWidth, ballHeight, color, view, BallXStartSpeed, ballYStartSpeed, gradientMode);
+        super(ballXStartPosition, ballYStartPosition, ballWidth, ballHeight, color, view, BallXStartSpeed, ballYStartSpeed);
     }
 
     //For checking if the ball has collided with something of interest.
@@ -31,8 +31,6 @@ public class Ball extends GraphicsObject {
         if(xPosition > view.getWidth()-width && xSpeed > 0) xSpeedDoubleVersion *= -0.4;
         if(yPosition < 0 && ySpeed < 0) ySpeedDoubleVersion *= -0.4;
         if(yPosition > view.getHeight()-height && ySpeed > 0) ySpeedDoubleVersion *= -0.4;
-
-
     }
 
     public Point getTop() {
@@ -51,9 +49,8 @@ public class Ball extends GraphicsObject {
     public void updateRect() {
         size.set(xPosition, yPosition, xPosition+width, yPosition+height);
     }
-    public void updateGradient() {
 
-    }
+    //Never used in the final version.
     public void handleCollisionTop() {
         Log.d("collision", "top");
         ySpeedDoubleVersion *= -0.4;
@@ -99,9 +96,6 @@ public class Ball extends GraphicsObject {
         accelerationX = ((double) acceleratorX)*(-1.0);   //Movement in the x-axis seemed to be reverse of what was needed, so the value is now taken times minus one.
         accelerationY = (double) acceleratorY;
 
-        //Log.v("speed", Double.toString(accelerationY + accelerationX));
-
-
         //Ignores minor acceleration values given by the accelerometer.
         //The idea is to remove drawn out lingering movement when a phone is for example left on a table.
         if(accelerationX <= 0.5 && accelerationX >= -0.5){
@@ -121,15 +115,12 @@ public class Ball extends GraphicsObject {
         //(1/2)at2 is the additional movement caused this time due to the current acceleration a.
         //pow(double a, double b) returns a to the power of b (a^b)
         xSpeedDoubleVersion = xSpeedDoubleVersion*friction+0.5*accelerationX*Math.pow(timeStamp, 2.0);
-        //Log.v("xSpeedDoubleVersion", "" + xSpeedDoubleVersion);
         ySpeedDoubleVersion = ySpeedDoubleVersion*friction+0.5*accelerationY*Math.pow(timeStamp, 2.0);
-        //Log.v("ySpeedDoubleVersion", ""+ySpeedDoubleVersion);
 
         //The imaginary distances are leftover parts that couldn't be expressed with a whole pixel during the last calculation.
         //Probably quite unnecessary, but could as well stay there unless it gets in the way somehow.
         //Takes the last leftover and combines it with the current speed as the whole movement to be attempted.
         xDistanceImaginary = xDistanceImaginary + xSpeedDoubleVersion;
-        //Log.v("xDistanceImaginary", ""+xDistanceImaginary);
 
         //As long as the total amount of pixels to be moved is 1 or more in any direction, that value is sent to be taken apart into total pixels and a leftover value for the next move() call.
         if(xDistanceImaginary >= 1 || xDistanceImaginary <= -1) {
@@ -144,7 +135,6 @@ public class Ball extends GraphicsObject {
 
         //Same thing as for movement in the x-axis.
         yDistanceImaginary = yDistanceImaginary + ySpeedDoubleVersion;
-        //Log.v("yDistanceImaginary", "" + yDistanceImaginary);
 
         if(yDistanceImaginary >= 1 || yDistanceImaginary <= -1) {
             speedAndLeftoverDecimal = getSpeedAndLeftoverDecimalValue(yDistanceImaginary);
@@ -279,8 +269,6 @@ public class Ball extends GraphicsObject {
         if(xSpeed < 0) preemptiveXSpeed *= -1;
         if(ySpeed < 0) preemptiveYSpeed *= -1;
 
-        //Log.v("Preemptive speeds", "x = "+preemptiveXSpeed+" y = "+preemptiveYSpeed);
-
         //While loop that runs until the absolute value of the distance moved in either x-axis or y-axis by ticks is the same as the attempted xSpeed or ySpeed depending on direction.
         //Both of there conditions need to match, but logically they should both match exactly after the same amount of ticks (the higher value of xSpeed and ySpeed for the current frame), unless one of them was 0 to begin with,
         // or there are some minor decimal errors...
@@ -289,25 +277,6 @@ public class Ball extends GraphicsObject {
             //While the while runs, the preemptive imaginary distance traveled in each direction is increased with the values given earlier for each tick.
             preemptiveXDistance += preemptiveXSpeed;
             preemptiveYDistance += preemptiveYSpeed;
-
-            //Log.v("Current preemptive distances", "x = "+preemptiveXDistance+" aka. "+(int) preemptiveXDistance+" y = "+preemptiveYDistance+" aka. "+(int) preemptiveYDistance);
-
-            //int grades = 355;
-            //int xM = (int) (Math.round((double) (xPosition)+(double) (width)/2)+preemptiveXDistance);
-            //int yM = (int) (Math.round((double) (yPosition)+(double) (height)/2)+preemptiveYDistance);
-
-            //Log.v("middle point:", "xM "+xM+", yM "+yM);
-
-            /*int a = Math.round(width/2);
-            double a2 = (double)(width/2);
-            double a3 = Math.round((double)(width)/2);
-            double b = Math.cos(90);
-            double b2 = Math.cos(Math.toRadians(90));
-            int c = xM;
-
-            Log.v("stuff:", "radius (expected 6 )"+a+a2+a3+", cos(90) (expected 0) "+b+" toRadians (expected 0) "+b2+", middle point x (expected same as formula for 90 grades) "+c);*/
-
-            //(int) Math.round((width/2)*Math.cos(90))+xPosition+Math.round(width/2);
 
             //Once values for a new tick are given, a check needs to run for each of the dots on the outer line of the ball where the user wants collision checks to occur.
             //This amount is decided by a for loop in the move() method, where lower angle values give more dots to check on the ball's outer line.
@@ -342,6 +311,7 @@ public class Ball extends GraphicsObject {
                 //Once collisions have started and ended the middle one is acted on.
                 if(collisionsEnded) {
 
+                    //From all points that collided at the same moment it's important to get the middle one so correct rebounding can be calculated.
                     collisionPointsMiddle = collisionPoints.get((int) Math.round(totalCollisions/2)-1);
 
                     y2 = collisionPointsMiddle.get(1);    //Y for point of contact.
@@ -352,34 +322,38 @@ public class Ball extends GraphicsObject {
                     if(!(x2 == x1)) {
                         k1 = ((double) (y2)-(double) (y1))/((double) (x2)-(double) (x1));
                     }
-                    else {
+                    else {  //For handling cases where you'd otherwise get division by 0.
                         k1 = ((double) (y2)-(double) (y1))/(0.0000000000000000001);
                     }
 
                     if(!(xSpeedDoubleVersion == 0)) {
                         k2 = ySpeedDoubleVersion/xSpeedDoubleVersion;
                     }
-                    else {
+                    else {  //For handling cases where you'd otherwise get division by 0.
                         k2 = ySpeedDoubleVersion/0.0000000000000000001;
                     }
 
+                    //Using pythagoras to get the speed vector length.
                     speedVectorLength = Math.sqrt(Math.pow(xSpeedDoubleVersion, 2)+Math.pow(ySpeedDoubleVersion, 2));
 
+                    //A bit confusing, but in the end tanAlpha3 gives the smaller angle between the ball's speed vector and the vector from the point of contact to the ball's middle point.
+                    //This angle is later used to calculate the speed vector out from the wall (doesn't work always, another way of doing it is done then).
                     tanAlpha = Math.abs((k1-k2)/(1+k1*k2));
                     tanAlpha2 = Math.atan(tanAlpha);
-
                     tanAlpha3 = Math.toDegrees(tanAlpha2);
 
+                    //The angle that is used to test for a similar direction the ball had at the moment of collision.
                     collisionPointReverseAngle = collisionPointsMiddle.get(2)+180;
                     testAngle = collisionPointReverseAngle+tanAlpha3;
 
+                    //k stands for direction in these tests, while x and y are speed components of the total vector.
                     xTest = (Math.cos(Math.toRadians(testAngle)));
                     yTest = (Math.sin(Math.toRadians(testAngle)));
                     kTest = yTest/xTest;
 
-                    if(kTest <= k2+0.0001 && kTest >= k2-0.0001) {
-                        //Same direction found, another test needed for the real one.
+                    if(kTest <= k2+0.0001 && kTest >= k2-0.0001) {  //Same direction found, another test needed for the real one.
 
+                        //Now with minus instead of plus.
                         testAngle = collisionPointReverseAngle-tanAlpha3;
 
                         xTest = (Math.cos(Math.toRadians(testAngle)));
@@ -391,8 +365,7 @@ public class Ball extends GraphicsObject {
                         xSpeedDoubleVersion = xAndYSpeeds.get(0);
                         ySpeedDoubleVersion = xAndYSpeeds.get(1);
                     }
-                    else {
-                        //Potential new direction found. A check needs to be done in the other direction to see if it's correct.
+                    else {  //Potential new direction found. A check needs to be done in the other direction to see if it's correct.
 
                         //Before the second test, the values from the first test are temporarily saved, in case the test passes.
                         xTestTemp = xTest;
@@ -406,27 +379,26 @@ public class Ball extends GraphicsObject {
                         yTest = (Math.sin(Math.toRadians(testAngle)));
                         kTest = yTest/xTest;
 
-                        if(kTest <= k2+0.0001 && kTest >= k2-0.0001) {
-                            //Second test direction was same as the original speed direction. Using temp values to calculate new direction.
+                        if(kTest <= k2+0.0001 && kTest >= k2-0.0001) {  //Second test direction was same as the original speed direction. Using temp values to calculate new direction.
 
                             ArrayList<Double> xAndYSpeeds = getNewSpeedVectorXAndY(xTestTemp, yTestTemp, speedVectorLength, kTestTemp);
 
                             xSpeedDoubleVersion = xAndYSpeeds.get(0);
                             ySpeedDoubleVersion = xAndYSpeeds.get(1);
                         }
-                        else {
-                            //No match found in either direction, which means the above method didn't work. Another method is used.
+                        else {  //No match found in either direction, which means the above testing didn't work. Another way is used.
 
+                            //Pythagoras used.
                             speedVectorLength = Math.sqrt(Math.pow(xSpeedDoubleVersion, 2)+Math.pow(ySpeedDoubleVersion, 2));
 
-                            //dirWall here
+                            //dirWall here.
                             dirWallX = x1-x2;
                             dirWallY = y1-y2;
 
                             if(!(dirWallX == 0)) {
                                 dirWallK = dirWallY/dirWallX;
                             }
-                            else {
+                            else {  //For handling cases where you'd otherwise get division by 0.
                                 dirWallK = dirWallY/0.0000000000000000001;
                             }
 
@@ -435,17 +407,18 @@ public class Ball extends GraphicsObject {
                             wallXTotal = xAndYFromWall.get(0);
                             wallYTotal = xAndYFromWall.get(1);
 
-                            //dirNew here (dirWall + dirBall)
+                            //dirNew here (dirWall + dirBall).
                             xSpeedDoubleFromCollision = xSpeedDoubleVersion+wallXTotal;
                             ySpeedDoubleFromCollision = ySpeedDoubleVersion+wallYTotal;
 
                             if(!(xSpeedDoubleFromCollision == 0)) {
                                 dirOutK = ySpeedDoubleFromCollision/xSpeedDoubleFromCollision;
                             }
-                            else {
+                            else {  //For handling cases where you'd otherwise get division by 0.
                                 dirOutK = ySpeedDoubleFromCollision/0.0000000000000000001;
                             }
 
+                            //Gives new speeds in x and y axis. Some special circumstances need to be checked for, hence if/else.
                             if(!((xSpeedDoubleFromCollision == 0 || ySpeedDoubleFromCollision == 0 ) && (Math.abs(k2)-0.0001 <= Math.abs(dirWallK) || Math.abs(k2)+0.0001 >= Math.abs(dirWallK)))) {
 
                                 xAndYFromWall.clear();
@@ -495,19 +468,16 @@ public class Ball extends GraphicsObject {
 
     //Give some information to get new speeds for x and y during collision.
     public ArrayList<Double> getNewSpeedVectorXAndY(double x, double y, double oldVectorMagnitude, double k) {
-        ArrayList<Double> xAndY = new ArrayList<Double>();
-        double xTotal = 1;
-        double yTotal = Math.abs(k);
-
-        //Log.v("All kinda stuff", "old xTot/yTot "+xTotal+" "+yTotal);
+        xAndY = new ArrayList<Double>();
+        xTotal = 1;
+        yTotal = Math.abs(k);
 
         baseVector = Math.sqrt(Math.pow(xTotal, 2)+Math.pow(yTotal, 2));
         multiplier = oldVectorMagnitude/baseVector;
         xTotal *= multiplier;
         yTotal *= multiplier;
 
-        //Log.v("All kinda stuff", "oldVec "+oldVectorMagnitude+" baseVec "+baseVector+" multiplier "+multiplier+" new xTot/yTot "+xTotal+" "+yTotal);
-
+        //Reverses movement in negative directions.
         if(x < 0) xTotal *= -1;
         if(y < 0) yTotal *= -1;
 
@@ -515,10 +485,5 @@ public class Ball extends GraphicsObject {
         xAndY.add(yTotal);
 
         return xAndY;
-    }
-
-    //Not used right now. Changes glowMode in-game if needed for some reason.
-    public void setGlowMode(boolean bool) {
-        gradientMode = bool;
     }
 }
