@@ -276,7 +276,7 @@ public class GraphicsObject {
     }
 
     public void setGradientFadeColorTrailblazer() {
-        gPaintFade.setColor(Color.parseColor("#E1000000"));
+        gPaintFade.setColor(Color.parseColor("#E0000000"));
     }
 
     public void setGradientFadeColorGlowstick() {

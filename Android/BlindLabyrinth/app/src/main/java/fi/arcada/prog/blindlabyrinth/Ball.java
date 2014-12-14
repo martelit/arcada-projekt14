@@ -386,18 +386,10 @@ public class Ball extends GraphicsObject {
                         yTest = (Math.sin(Math.toRadians(testAngle)));
                         kTest = yTest/xTest;
 
-                        if(kTest <= k2+0.0001 && kTest >= k2-0.0001) {
-                            //This should never run.
-                            Log.v("Wrong if reached", "This was never supposed to happen...");
-                        }
-                        else {
-                            //New direction found.
+                        ArrayList<Double> xAndYSpeeds = getNewSpeedVectorXAndY(xTest, yTest, speedVectorLength, kTest);
 
-                            ArrayList<Double> xAndYSpeeds = getNewSpeedVectorXAndY(xTest, yTest, speedVectorLength, kTest);
-
-                            xSpeedDoubleVersion = xAndYSpeeds.get(0);
-                            ySpeedDoubleVersion = xAndYSpeeds.get(1);
-                        }
+                        xSpeedDoubleVersion = xAndYSpeeds.get(0);
+                        ySpeedDoubleVersion = xAndYSpeeds.get(1);
                     }
                     else {
                         //Potential new direction found. A check needs to be done in the other direction to see if it's correct.
