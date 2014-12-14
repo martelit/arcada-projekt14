@@ -53,6 +53,10 @@ public class MainActivity extends GameActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //For setting background.
+        View background = findViewById(R.id.background);
+        background.setBackgroundResource(R.drawable.background);
+
         if (!Cache.getInstance().aeBound) {
             Intent intent = new Intent(this, AudioEngine.class);
             bindService(intent, aeConnection, Context.BIND_AUTO_CREATE);
