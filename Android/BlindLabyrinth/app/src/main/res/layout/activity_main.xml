@@ -13,7 +13,8 @@
         android:id="@+id/btnGameViewBlank"
         android:src="@drawable/startbutton"
         android:layout_above="@+id/btnSettings"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:background="@android:color/transparent"/>
 
     <ImageButton
         android:layout_width="140dp"
@@ -23,7 +24,8 @@
 
         android:src="@drawable/settingsbutton"
         android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:background="@android:color/transparent"/>
 
 
 </RelativeLayout>
