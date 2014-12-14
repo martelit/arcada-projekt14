@@ -7,8 +7,10 @@ import android.media.Image;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -137,6 +139,13 @@ public class Settings extends GameActivity {
         });
 
         updateBallPreview();
+
+        ((ImageButton) findViewById(R.id.backButton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goBack();
+            }
+        });
     }
 
     private void updateBallPreview() {
@@ -179,5 +188,9 @@ public class Settings extends GameActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void goBack() {
+        finish();
     }
 }

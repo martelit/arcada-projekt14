@@ -157,7 +157,17 @@
         android:layout_alignParentLeft="false"
         android:layout_alignParentRight="true"
         android:id="@+id/ballPreview"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:layout_marginRight="80dp"/>
+
+    <ImageButton
+        android:layout_width="110dp"
+        android:layout_height="60dp"
+        android:id="@+id/backButton"
+        android:src="@drawable/backbutton"
+        android:layout_below="@+id/ballPreview"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="40dp"/>
 
 </RelativeLayout>
