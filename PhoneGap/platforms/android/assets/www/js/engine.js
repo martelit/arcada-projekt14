@@ -1,326 +1,365 @@
-	//Define engine.js-global variables
-				
-		var darknessCanvas;
-		var darknessContext;
-		var darkness = false;
-		var nightmare = false;
-		var tokenTimer = 0;
-		var tokenLightOn;
-		var tokenLightX = 0;
-		var tokenLightY = 0;
-		var tokenLightTime = 150;
-		var tokenFinder = true;
-		
-		var symbolsCanvas;
-		var symbolsContext;
-		
-		//Maze definitions
-		var canvas;
-		var context;
-		var lsSize = localStorage.size;
-		var lsMode = localStorage.mode;
-		var lsColor = localStorage.color;
-		var mazeName = "null";
-		var skinName = "null";
-		
-		//Ball movement definitions
-		var speedX = 0;
-		var speedY = 0;
-		var speedUnit = 0.2;
-		var maxSpeed = 3;
-		var bounceSensitivity = speedUnit + 0.01;
-		var bounceSpeedDimish = -0.4;
-		
-		//Ball definitions
-		var ball = null;
-		var ballPosition = null;
-		var ballLeft = 0;
-		var ballRight = 0;
-		var ballTop = 0;
-		var ballBottom = 0;
-		var ballRadius = 0;
-		var ballSize = 0;
-		
-		//Acceleration definitions
-		var accX = 0;
-		var accY = 0;
-		
 		//Window size definitions
-		var windowWidth = $(window).width();
-		var windowHeight = $(window).height();		
-
-	
-    // The watch id references the current `watchAcceleration`
+	var windowWidth = $(window).width();
+	var windowHeight = $(window).height();
+	//Watch (for accelerometer) definition
     var watchID = null;
+	//Game mode definitions
+	var mode = {
+		darkness: false,
+		nightmare: false,		
+	}
+	//Darkness game modes definitions
+	var darkness = {
+		c: null,
+		ctx: null		
+	}
+	//Token definitions
+	var token = {
+		timer: 0,
+		lightTime: 150,
+		lightOn: false,
+		lightRadius: 90,
+		x: 0,
+		y: 0
+	}
+	//Gameboard definitions
+	var gameboard = {
+		left: ((windowWidth/2)-(windowHeight/2)),
+		right: ((windowWidth/2)-(windowHeight/2)) + windowHeight,
+		width: windowHeight,
+		height: windowHeight	
+	}
+	//Background layer definitions
+	var background = {
+		c: null,
+		ctx: null,
+		name: "null",
+	}
+	//Skin layer definitions
+	var skin = {
+		name: "null",
+	}
+	//Symbol layer definitions
+	var symbols = {
+		c: null,
+		ctx: null
+	}
+	//Settings definitions
+	var settings = {
+		size: localStorage.size,
+		mode: localStorage.mode,
+		color: localStorage.color		
+	}
+	//Ball speed definitions
+	var speed = {
+		x: 0,
+		y: 0,
+		unit: 0.2,
+		max: 3
+	}
+	//Ball bounce definitions
+	var bounce = {
+		sensitivity: speed.unit * 1.01,
+		dimish: -0.7
+	}
+	//Ball definitions
+	var ball = {
+		c: null,
+		ctx: null,
+		obj: null,
+		position: null,
+		left: 0,
+		right: 0,
+		top: 0,
+		bottom: 0,
+		radius: 0,
+		size: 0,
+		lightRadius: 25,
+	}
+	//Acceleration definitions
+	var acc = {
+		x: 0,
+		y: 0
+	}
 
     // Wait for Cordova to load
-    //
     document.addEventListener("deviceready", onDeviceReady, false);
 	
     // Cordova is ready
-    //	
-    function onDeviceReady() {
-		
-		//Load from settings
+    function onDeviceReady() {		
+		//Load game mode and map + skin based on settings
 		pickMaze();		
-		pickMode();
+		pickMode();		
 		
-		//Set up the canvas
-		canvas = document.getElementById("canvas");
-		context = canvas.getContext("2d");
-				
-		//Graphical skin layer setup
+		//Background (that is used for collision detection) map set up		
+		mapSetup("maps/"+background.name+".png");		
+		
+		//Graphical skin layer set up
 		skinSetup();
 		
-		//BALL SETUP, ballSize as parameter
-		ballSetup(12);
-
-		//Symbol layer setup
+		//Symbol layer set up
 		symbolsSetup();
 		
-		//Draw the maze background
-		window.setTimeout(function(){drawMaze("maps/"+mazeName+".png");}, 2000);
-		if(nightmare){
-			window.setTimeout(function(){setDarkness();}, 3000);
-		}
-		startWatch();
+		//Load token skins to symbolcanvas
+		window.setTimeout(function(){findTokens();}, 1000);
 		
+		//BALL SETUP, ballSize as parameter
+		window.setTimeout(function(){ballSetup(12);}, 1000);
+		
+		//Start accelerometer
+		startWatch();
     }
 
-	//Drawing the maze
-	function drawMaze(mazeFile){
-		var imgMaze = new Image();
-		imgMaze.onload = function() {
-			//Resize the canvas to match the mace picture
-			canvas.width = windowWidth;
-			canvas.height = windowHeight;
-			
-			//Draw the maze
-			context.drawImage(imgMaze, ((windowWidth/2)-(windowHeight/2)),0, windowHeight, windowHeight);		
-		}
-		imgMaze.src = mazeFile;
-	}
     // Start watching the acceleration
-    //
     function startWatch() {
-
-        var options = { frequency: 30 };
-
+		//1000 (1s) / 30 = 30FPS
+        var options = { frequency: (1000 / 30) };
         watchID = navigator.accelerometer.watchAcceleration(onSuccess, onError, options);
     }
 
     // Stop watching the acceleration
-    //
     function stopWatch() {
         if (watchID) {
             navigator.accelerometer.clearWatch(watchID);
             watchID = null;
         }
     }
-
-    // onSuccess: Get a snapshot of the current acceleration
-    // BALL MOVEMENT
 	
-    function onSuccess(acceleration) {    
-							
+    // onSuccess: Get a snapshot of the current acceleration
+	// MAIN THREAD
+    function onSuccess(acceleration) { 
 		//Fetch ACCELERATION values, X=Y && Y=X due to forced landscape
-		accX = acceleration.y;
-		accY = acceleration.x;
+		acc.x = acceleration.y;
+		acc.y = acceleration.x;
 		
-		//MOVE TO RIGHT, accX is POSITIVE
-		if(accX > 1){
-			if(speedX <= maxSpeed){
-				if(speedX <= 0){
-					speedX += speedUnit*2;
+		//UPDATES speed variables based on acceleration
+		updateMovement();
+		
+		//ALL MODES, check for collision
+		checkCollision();
+		
+		//Ball movement
+		drawBall();
+    }
+	
+	// onError: Failed to get the acceleration
+    function onError() {
+        alert('onError!');
+    }
+	
+	//USE velocity for ball animation
+	function animateBall(){
+		ball.obj.velocity({top:"+="+speed.y, left:"+="+speed.x}, {duration: 0.1});
+	}
+	
+	//Clear old ball, update variables and draw the new ball
+	//DARKMODES: call for lightUp on ball coordinates and tokenLight if its token.lightOn == true
+	function drawBall(){
+		//Clear old ball
+		clearBall(ball.left,ball.top);
+		
+		//Update ball location
+		ball.left += speed.x;
+		ball.right = ball.left + ball.size;
+		ball.top += speed.y;
+		ball.bottom = ball.top + ball.size;
+		
+		//Draw the new ball
+		drawCircle(ball.left, ball.top);
+		
+		//If darkness is true and nightmare is false, lightup ball and check if token should be lit
+		if(mode.darkness && mode.nightmare == false){
+			lightUp(ball.left, ball.top);
+			if(token.lightOn && settings.mode == "glowing"){
+				tokenLightUp();
+			}
+		}
+	}
+	
+	//UPDATE MOVEMENT on basis of the current acceleration
+	function updateMovement(){
+		//MOVE TO RIGHT, acc.x is POSITIVE
+		if(acc.x > 1){
+			//Check if ball is moving at max speed
+			if(speed.x <= speed.max){
+				//Add twice the speed.unit if the ball is moving in the opposite direction (faster turnarounds)
+				if(speed.x <= 0){
+					speed.x += speed.unit*2;
 				}
+				//Else add one speed unit
 				else{
-					speedX += speedUnit;
+					speed.x += speed.unit;
 				}
 			}			
 		}
-		//MOVE TO LEFT, accX is NEGATIVE
-		else if(accX < -1){
-			if(speedX >= -maxSpeed){
-				if(speedX >= 0){
-					speedX += -speedUnit*2;
+		//MOVE TO LEFT, acc.x is NEGATIVE, refer to MOVE TO RIGHT for comments
+		else if(acc.x < -1){
+			if(speed.x >= -speed.max){
+				if(speed.x >= 0){
+					speed.x += -speed.unit*2;
 				}
 				else{
-					speedX += -speedUnit;
+					speed.x += -speed.unit;
 				}
 			}
 		}
-		//SLOW DOWN, accX is NEUTRAL
+		//SLOW DOWN HORIZONTAL, acc.x is NEUTRAL
 		else{
-			if(speedX > 0){
-				speedX += -speedUnit/2;
+			//If current speed is higher than a single speed unit, cut it down by half a speed unit
+			if(speed.x > speed.unit){
+				speed.x += -speed.unit/2;
 			}
-			else if(speedX < 0){
-				speedX += speedUnit/2;
+			//If current speed is higher than a single speed unit, cut it down by half a speed unit
+			else if(speed.x < -speed.unit){
+				speed.x += speed.unit/2;
+			}
+			//If current speed is less than a single speed unit set the speed to 0. To avoid endless bouncing
+			else{
+				speed.x = 0;
 			}
 		}
-		//MOVE DOWNWARDS, accY is POSITIVE
-		if(accY > 1){
-			if(speedY <= maxSpeed){
-				if(speedY <= 0){
-					speedY += speedUnit*2;
+		//MOVE DOWNWARDS, acc.y is POSITIVE, refer to MOVE TO RIGHT for comments
+		if(acc.y > 1){
+			if(speed.y <= speed.max){
+				if(speed.y <= 0){
+					speed.y += speed.unit*2;
 				}
 				else{
-					speedY += speedUnit;
+					speed.y += speed.unit;
 				}
 			}
 		}
-		//MOVE UPWARDS, accY is NEGATIVE
-		else if(accY < -1){
-			if(speedY >= -maxSpeed){
-				if(speedY >= 0){
-					speedY += -speedUnit*2;
+		//MOVE UPWARDS, acc.y is NEGATIVE, refer to MOVE TO RIGHT for comments
+		else if(acc.y < -1){
+			if(speed.y >= -speed.max){
+				if(speed.y >= 0){
+					speed.y += -speed.unit*2;
 				}
 				else{
-					speedY += -speedUnit;
+					speed.y += -speed.unit;
 				}
 			}
 		}
-		//SLOW DOWN, accY is NEUTRAL
+		//SLOW DOWN VERTICAL, acc.y is NEUTRAL, refer to SLOW DOWN HORIZONTAL for comments
 		else{
-			if(speedY > 0){
-				speedY += -speedUnit/2;
+			if(speed.y > speed.unit){
+				speed.y += -speed.unit/2;
 			}
-			else if(speedY < 0){
-				speedY += speedUnit/2;
+			else if(speed.y < -speed.unit){
+				speed.y += speed.unit/2;
 			}
-		}
-			
-		//ALL MODES, check for collision
-		checkCollision();	
-
-		//VISIBLE MODE, animate ball movement
-		if(!darkness){
-			ball.velocity({top:"+="+speedY, left:"+="+speedX}, {duration: 0.1});
-		}
-		
-		//DARKMODES, clear old ball
-		if(darkness){
-			clearBall(ballLeft,ballTop);
-		}
-		
-		//ALL MODES, update position variables
-		ballLeft += speedX;
-		ballRight = ballLeft + ballSize;
-		ballTop += speedY;
-		ballBottom = ballTop + ballSize;
-		
-		//DARKMODES, draw new ball, light and tokenlight
-		if(darkness){
-			drawCircle(ballLeft, ballTop);
-			if(nightmare == false){
-				lightUp(ballLeft, ballTop);
-				if(tokenLightOn == true){
-					tokenLightUp();
-				}
+			else{
+				speed.y = 0;
 			}
-		}
-		
-		if(tokenFinder){
-			findTokens();
-			tokenFinder = false;
-		}
-    }
+		}	
+	}
 	
-	
-	
+	//CHECK FOR COLLISION
 	function checkCollision(){		
 				
 		var collision = false;
 		
+		//Send field of pixels to checkColor function. Field is as small as possible based on the speed.
+		//Field created like follows, checkColor(left coordinate, top coordinate, width, height).
+		//Field + ball demonstration below...
+	//				 _____
+	//		 ______	/     \
+	//		*	   |       |
+	//		|______|       |
+	//		        \_____/
+		
 		//LEFT
-		if(speedX < 0){
-			if(checkColor(ballLeft-(speedX*-1), ballTop+(ballRadius/2), (speedX*-1), ballRadius)){
-				if(speedX < (bounceSensitivity*-1)){
-					speedX = speedX * bounceSpeedDimish;
+		if(speed.x < 0){
+			//Send the field to checkColor, returns TRUE if there's an collision
+			if(checkColor(ball.left-(speed.x*-1), ball.top+(ball.radius/2), (speed.x*-1), ball.radius)){
+				//Check if current speed is higher than the bounce sensitivity
+				if(speed.x < (bounce.sensitivity*-1)){
+					//Bounce ball back and apply speed dimish
+					speed.x = speed.x * bounce.dimish;
+				}
+				//If speed is lower than the bounce sensitivity, set speed to 0 (no bounce)
+				else{
+					
+					speed.x = 0;
+				}
+				//Set collision to true 
+				collision = true;
+			}
+		}
+		//RIGHT, refer to LEFT for comments
+		else if(speed.x > 0){
+			if(checkColor(ball.right, ball.top+(ball.radius/2), speed.x, ball.radius)){
+				if(speed.x > bounce.sensitivity){
+					speed.x = speed.x * bounce.dimish;
 				}
 				else{
-					speedX = 0;
+					speed.x = 0;
 				}
 				collision = true;
 			}
 		}
-		//RIGHT
-		else if(speedX > 0){
-			if(checkColor(ballRight, ballTop+(ballRadius/2), speedX, ballRadius)){
-				if(speedX > bounceSensitivity){
-					speedX = speedX * bounceSpeedDimish;
+		//TOP, refer to LEFT for comments
+		if(speed.y < 0){
+			if(checkColor(ball.left+(ball.radius/2), ball.top-(speed.y*-1), ball.radius, (speed.y*-1))){
+				if(speed.y < (bounce.sensitivity*-1)){
+					speed.y = speed.y * bounce.dimish;
 				}
 				else{
-					speedX = 0;
+					speed.y = 0;
 				}
 				collision = true;
 			}
 		}
-		//TOP
-		if(speedY < 0){
-			if(checkColor(ballLeft+(ballRadius/2), ballTop-(speedY*-1), ballRadius, (speedY*-1))){
-				if(speedY < (bounceSensitivity*-1)){
-					speedY = speedY * bounceSpeedDimish;
+		//BOTTOM, refer to LEFT for comments
+		else if(speed.y > 0){
+			if(checkColor(ball.left+(ball.radius/2), ball.bottom, ball.radius, speed.y)){
+				if(speed.y > bounce.sensitivity){
+					speed.y = speed.y * bounce.dimish;
 				}
 				else{
-					speedY = 0;
-				}
-				collision = true;
-			}
-		}
-		//BOTTOM
-		else if(speedY > 0){
-			if(checkColor(ballLeft+(ballRadius/2), ballBottom, ballRadius, speedY)){
-				if(speedY > bounceSensitivity){
-					speedY = speedY * bounceSpeedDimish;
-				}
-				else{
-					speedY = 0;
+					speed.y = 0;
 				}
 				collision = true;
 			}
 		}	
 		
+		//If there was no collision on LEFT,RIGHT,TOP or DOWN we'll have to check TOP-LEFT,BOTTOM-LEFT,TOP-RIGHT and BOTTOM-RIGHT
 		if(collision == false){		
-			//TOP-LEFT
-			if(speedX <= 0 && speedY <= 0){
-				if(checkColor(ballLeft-(speedX*-1), ballTop-(speedY*-1), (speedX*-1)+(ballRadius/2), (speedY*-1)+(ballRadius/2))){
-					//window.alert("TOP-LEFT");
-					speedY = speedY * -1;
-					speedX = speedX * -1;
+			//TOP-LEFT, refer to LEFT for comments
+			if(speed.x <= 0 && speed.y <= 0){
+				if(checkColor(ball.left-(speed.x*-1), ball.top-(speed.y*-1), (speed.x*-1)+(ball.radius/2), (speed.y*-1)+(ball.radius/2))){
+					speed.y = speed.y * -1;
+					speed.x = speed.x * -1;
 				}
 			}
-			//BOTTOM-LEFT
-			else if(speedX <= 0 && speedY >= 0){
-				if(checkColor(ballLeft-(speedX*-1), ballBottom-(ballRadius/2), (speedX*-1)+(ballRadius/2), speedY+(ballRadius/2))){
-					//window.alert("BOTTOM-LEFT");
-					speedY = speedY * -1;
-					speedX = speedX * -1;
+			//BOTTOM-LEFT, refer to LEFT for comments
+			else if(speed.x <= 0 && speed.y >= 0){
+				if(checkColor(ball.left-(speed.x*-1), ball.bottom-(ball.radius/2), (speed.x*-1)+(ball.radius/2), speed.y+(ball.radius/2))){
+					speed.y = speed.y * -1;
+					speed.x = speed.x * -1;
 				}		
 			}
-			//TOP-RIGHT
-			else if(speedX >= 0 && speedY <= 0){
-				if(checkColor(ballRight-(ballRadius/2), ballTop-(speedY*-1), speedX+(ballRadius/2), (speedY*-1)+(ballRadius/2))){
-					//window.alert("TOP-RIGHT");
-					speedY = speedY * -1;
-					speedX = speedX * -1;
+			//TOP-RIGHT, refer to LEFT for comments
+			else if(speed.x >= 0 && speed.y <= 0){
+				if(checkColor(ball.right-(ball.radius/2), ball.top-(speed.y*-1), speed.x+(ball.radius/2), (speed.y*-1)+(ball.radius/2))){
+					speed.y = speed.y * -1;
+					speed.x = speed.x * -1;
 				}
 			}
-			//BOTTOM-RIGHT
-			else if(speedX >= 0 && speedY >= 0){
-				if(checkColor(ballRight-(ballRadius/2), ballBottom-(ballRadius/2), speedX+(ballRadius/2), speedY+(ballRadius/2))){
-					//window.alert("BOTTOM-RIGHT");
-					speedY = speedY * -1;
-					speedX = speedX * -1;
+			//BOTTOM-RIGHT, refer to LEFT for comments
+			else if(speed.x >= 0 && speed.y >= 0){
+				if(checkColor(ball.right-(ball.radius/2), ball.bottom-(ball.radius/2), speed.x+(ball.radius/2), speed.y+(ball.radius/2))){
+					speed.y = speed.y * -1;
+					speed.x = speed.x * -1;
 				}
 			}
-		}
-		
+		}		
 	}
 	
+	//Creates field and checks color of pixels inside of it
 	function checkColor(x, y, width, height) {
-	//Create image of the zone that the ball would potentially be moving to
-		var imgData = context.getImageData(x,y,width,height);
+	//Create image of the field that the ball would potentially be moving to
+		var imgData = background.ctx.getImageData(x,y,width,height);
 		var pixels = imgData.data;
 		
 		//check these pixels
@@ -330,136 +369,356 @@
 			var blue = pixels[i+2];
 			var alpha = pixels[i+3];
 			
-			//Look for black
+			//WALL, look for black
 			if (red == 0 && green == 0 && blue == 0){
-			//Play SoundCollision when colliding with black pixels
-				//SoundCollision();
 				return true;
-			}
-			
-			//Look for Red
-			if (red > 200 && green == 0 && blue == 0){
+			}			
+			//GOAL, look for red
+			else if (red > 200 && green == 0 && blue == 0){
 				SoundFinish();
 				Goal();
-				return;
+				break;
 			}
-			//Look for Green
-			if (red == 0 && green > 180 && blue == 0){
-				return;
-			}
-			//Look for Blue
-			if (red == 0 && green == 0 && blue > 200){
+			//TOKEN, look for Blue, token.timer variable is there to avoid multiple hits
+			else if (red == 0 && green == 0 && blue > 200 && (token.timer > 20 || token.timer === 0)){
 				SoundToken();
-				if(nightmare == false){
-					tokenTimer = 0;
-					tokenLightOn = true;
-					tokenLightX = ballLeft + ballRadius;				
-					tokenLightY = ballTop + ballRadius;
+				if(mode.darkness == true && mode.nightmare == false){
+					token.timer = 0;
+					token.lightOn = true;
+					token.x = ball.left + ball.radius;				
+					token.y = ball.top + ball.radius;
+					if(settings.mode == "glowing"){
+						repaintDarkness(token.x, token.y, token.lightRadius);
+					}
+					tokenLightUp();
 				}
-				return;
-				
+				return;			
 			}
 		}		
 		return false;
 	}
 	
-		function randomInt(min,max)	{
+	//Create random int between min and max
+	function randomInt(min,max)	{
 		return Math.floor(Math.random()*(max-min+1)+min);
 	}
 	
-	function pickMaze() {
-	
-		if(lsSize == "random" || lsSize == "undefined"){		
+	//Set background and skin variables based on settings
+	function pickMaze() {	
+		if(settings.size == "random" || settings.size == "undefined"){		
 			window.alert("Picking random maze");
 			var randomNr = randomInt(1,3);
 		}
 		
-		if(randomNr==1 || lsSize=="small"){
-			mazeName = "small";
-			skinName = "brushed";
+		if(randomNr==1 || settings.size=="small"){
+			background.name = "small";
+			skin.name = "brushed";
 		}
-		else if(randomNr==2 || lsSize=="medium"){
-			mazeName = "medium";
-			skinName = "skulls";			
+		else if(randomNr==2 || settings.size=="medium"){
+			background.name = "medium";
+			skin.name = "skulls";			
 		}
-		else if(randomNr==3 || lsSize=="big"){
-			mazeName = "big";
-			skinName = "kitty";
+		else if(randomNr==3 || settings.size=="big"){
+			background.name = "big";
+			skin.name = "kitty";
 		}			
 	}
-	
+	//Set game mode based on settings
 	function pickMode() {
-		if(lsMode == "random" || lsMode == "undefined"){
+		if(settings.mode == "random" || settings.mode == "undefined"){
 			window.alert("Picking random mode");
 			var randomNr = randomInt(1,3);
 		}
 		
-		if(randomNr==1 || lsMode=="visible"){
-			darkness = false;
+		if(randomNr==1 || settings.mode=="visible"){
+			mode.darkness = false;
 		}		
-		else if(randomNr==2 || lsMode=="trace"){
+		else if(randomNr==2 || settings.mode=="trace"){
 			setDarkness();
-			darkness = true;
+			mode.darkness = true;
 		}		
-		else if(randomNr==3 || lsMode=="glowing"){
+		else if(randomNr==3 || settings.mode=="glowing"){
 			setDarkness();
-			darkness = true;
+			mode.darkness = true;
 		}		
-		else if(randomNr==4 || lsMode=="dark"){
-			darkness = true;
-			nightmare = true;
-			
+		else if(randomNr==4 || settings.mode=="dark"){
+			mode.darkness = true;
+			mode.nightmare = true;			
 		}
 		
-		if(darkness){
+		if(mode.darkness){
 			var divBall = document.getElementById('ball');
 			divBall.style.opacity = '0';
 		}
 	
 	}
 	
-	
-	function findTokens(){
-		var tokens = 0;
-		var ftX;
-		var ftY = 0;
-		var ftWidth = (windowHeight/18);
-		var ftHeight = windowHeight;
-		for(var j = 0; j < 18; j += 1){
-			ftX = (((windowWidth/2)-(windowHeight/2)) + (ftWidth * j));
-			var imgData = context.getImageData(ftX, ftY, (ftWidth*0.8), ftHeight);
-			var pixels = imgData.data;
-			for (var i = 0; n = pixels.length, i < n; i += 4) {
-				var red = pixels[i];
-				var green = pixels[i+1];
-				var blue = pixels[i+2];
-				var alpha = pixels[i+3];
+	//Drawing the background
+	function mapSetup(mazeFile){
+		//Set up the canvas
+		var imgMaze = new Image();
+		imgMaze.onload = function() {	
+			background.c = document.getElementById("canvas");
+			background.ctx = background.c.getContext("2d");	
+			background.c.width = windowWidth;
+			background.c.height = windowHeight;	
+			//Draw the maze
+			background.ctx.drawImage(imgMaze, gameboard.left,0, gameboard.width, gameboard.height);		
+		}
+		imgMaze.src = mazeFile;
+	}
+	//Drawing first ball
+	function ballSetup(size){
+		ball.c = document.getElementById("cBall");
+		ball.ctx = ball.c.getContext("2d");
+		ball.c.width = windowWidth;
+		ball.c.height = windowHeight;
+		ball.c.style.top = "0px";
+		ball.c.style.left = "0px";
+		
+		ball.size = size;
+		ball.radius = ball.size/2;
+		ball.right = ball.left + ball.size;
+		ball.bottom = ball.top + ball.size;
+		
+		drawCircle(ball.left, ball.top);
+		/*
+		//BALL DEFINITIONS
+		var bs = document.getElementById('ball');
+		var startLeft = ((windowWidth/2)-(windowHeight/2)) + 10;
+		var startTop = 10;		
 				
-				//Look for Blue
-				if (red == 0 && green == 0 && blue > 200){
-					//SoundToken();
-					tokens += 1;
-					break;
-				}
-			}
-		}		
-		//window.alert("Tokens found: "+tokens);
+		//BALL SETUP
+		bs.style.left = ball.left + 'px';
+		bs.style.Top = ball.top + 'px';
+		bs.style.width = size + 'px';
+		bs.style.height = size + 'px';
+		bs.style.backgroundColor = settings.color;		
+		
+		//FETCH VALUES
+		ball.obj = $("#ball");		
+		ball.size = ball.obj.height();
+		ball.radius = ball.size/2;		
+		ball.position = ball.obj.position();
+		ball.left = ball.position.left;
+		ball.right = ball.position.left + ball.size;
+		ball.top = ball.position.top;
+		ball.bottom = ball.position.top + ball.size;*/
 	}
 	
-
-    // onError: Failed to get the acceleration
-    //
-    function onError() {
-        alert('onError!');
-    }
-    
+	//SETUP SYMBOLS LAYER FOR ICONS (TOKENS & FINISH)
+	function symbolsSetup(){
+		symbols.c = document.getElementById("symbols");
+		symbols.ctx = symbols.c.getContext("2d");
+		symbols.c.width = windowWidth;
+		symbols.c.height = windowHeight;
+		symbols.c.style.top = "0px";
+		symbols.c.style.left = "0px";	
+	}
+	
+	//Skin layer set up
+	function skinSetup(){
+		//SKIN DEFINITIONS
+		var skinSetup = document.getElementById('skin');
+		var skinSize = gameboard.width;
+		var skinLeft = gameboard.left;
+		
+		//SKIN SETUP
+		skinSetup.style.left = skinLeft + 'px';
+		skinSetup.style.width = skinSize + 'px';
+		skinSetup.style.height = skinSize + 'px';
+		skinSetup.src = 'skins/'+skin.name+'.png';
+	}
+	
+	//Find tokens using checkColor
+	function findTokens(){		
+		window.alert("Loading...");
+		var tokens = 0;
+		var x = gameboard.left;
+		var width = (gameboard.width/18);
+		
+		//X
+		for(var j = x; j < (gameboard.right); j += 1){
+			//Y
+			for(var k = 1; k < gameboard.height; k += 1){
+				var imgData = background.ctx.getImageData(j, k, 1, 1);
+				var pixels = imgData.data;
+				for (var i = 0; n = pixels.length, i < n; i += 4) {
+					var red = pixels[i];
+					var green = pixels[i+1];
+					var blue = pixels[i+2];
+					var alpha = pixels[i+3];
+					
+					//Look for Blue
+					if (red == 0 && green == 0 && blue > 200){
+						tokens += 1;
+						loadSymbol(j,k,"token");
+						j += width;
+						break;
+					}
+				}
+			}
+		}
+		findStart();
+		findFinish();
+		window.alert("Tokens found: "+tokens);
+		//Show map for 3 seconds if nightmare -game mode is selected
+		if(mode.nightmare){
+			window.setTimeout(function(){setDarkness();}, 3000);
+		}
+	}
+	//Find start using checkColor
+	function findStart(){
+		var x = gameboard.left;
+		var width = (gameboard.width/18);
+		
+		//X
+		for(var j = x; j < (gameboard.right); j += 1){
+			//Y
+			for(var k = 1; k < gameboard.width; k += 1){
+				var imgData = background.ctx.getImageData(j, k, 1, 1);
+				var pixels = imgData.data;
+				for (var i = 0; n = pixels.length, i < n; i += 4) {
+					var red = pixels[i];
+					var green = pixels[i+1];
+					var blue = pixels[i+2];
+					var alpha = pixels[i+3];
+					
+					//Look for Green
+					if (red == 0 && green > 180 && blue == 0){
+						ball.left = j;
+						ball.top = k;
+						j = (gameboard.right);
+						break;
+					}
+				}
+			}
+		}
+	}
+	//Find finish using checkColor
+	function findFinish(){
+		var x = gameboard.left;		
+		//X
+		for(var j = (gameboard.right); j > x; j -= 1){
+			//Y
+			for(var k = 1; k < gameboard.height; k += 1){
+				var imgData = background.ctx.getImageData(j, k, 1, 1);
+				var pixels = imgData.data;
+				for (var i = 0; n = pixels.length, i < n; i += 4) {
+					var red = pixels[i];
+					var green = pixels[i+1];
+					var blue = pixels[i+2];
+					var alpha = pixels[i+3];
+					
+					//Look for Red
+					if (red > 200 && green == 0 && blue == 0){
+						loadSymbol(j-10,k-10,"finish");
+						j = x;
+						break;
+					}
+				}
+			}
+		}
+	}
+	//Loads symbol at coordinate
+	function loadSymbol(x,y,name){
+		var r = 10;
+		var $img = $('<img>', { src: "skins/"+name+".png" });
+		$img.load(function(){
+			symbols.ctx.drawImage(this, x, y, r, r);
+		});	
+	}
+	    
     //what happens in goal
     function Goal(){
-    	//just a reload :P
 		window.alert("You win!");
     	window.location.reload();
     }
-	
+	//Sets the darkness layer over skin
+	function setDarkness(){
+		darkness.c = document.getElementById("darkness");
+		darkness.ctx = darkness.c.getContext("2d");
+		darkness.c.width = windowWidth;
+		darkness.c.height = windowHeight;
+		darkness.c.style.top = "0px";
+		darkness.c.style.left = "0px";
+		darkness.ctx.globalAlpha = 1;		
+		darkness.ctx.fillStyle = "rgb(0, 0, 0)";
+		darkness.ctx.fillRect(gameboard.left,0, gameboard.width, gameboard.height);
+		darkness.ctx.globalCompositeOperation = "destination-out";	
+	}
+	function repaintDarkness(x,y,r){
+		r = r + 2;
+		darkness.ctx.globalCompositeOperation = "source-over";
+		darkness.ctx.arc(x,y,r, 0, Math.PI * 2, false);
+		darkness.ctx.closePath();	
+		darkness.ctx.fillStyle = "rgb(0, 0, 0)";
+		darkness.ctx.fill();	
+	}
+	//Lights up at coordinate
+	function lightUp(x,y){
+		x = x + ball.radius;
+		y = y + ball.radius;
+		if(settings.mode=="glowing"){
+			repaintDarkness(x,y,ball.lightRadius);
+		}
+		var grd = darkness.ctx.createRadialGradient(x,y,1,x,y,ball.lightRadius);
+		
+		grd.addColorStop(0, "rgba(255,255,255, 1)");
+		grd.addColorStop(0.6, "rgba(255,255,255, 1)");
+		grd.addColorStop(1, "transparent");
+		
+		darkness.ctx.globalCompositeOperation = "destination-out";
+		darkness.ctx.beginPath();
+		darkness.ctx.arc(x,y,ball.lightRadius, 0, Math.PI * 2, false);
+		darkness.ctx.closePath();
+		darkness.ctx.fillStyle = grd;
+		darkness.ctx.fill();
+	}
+	//Lights up token, triggered by checkColor->blue
+	function tokenLightUp(){
+		x = token.x;
+		y = token.y;
+		
+		var grd = darkness.ctx.createRadialGradient(x,y,1,x,y,token.lightRadius);
+		
+		grd.addColorStop(0, "rgba(255,255,255, 1)");
+		grd.addColorStop(0.6, "rgba(255,255,255, 1)");
+		grd.addColorStop(1, "transparent");
+		
+		darkness.ctx.globalCompositeOperation = "destination-out";
+		darkness.ctx.beginPath();
+		darkness.ctx.arc(x,y,token.lightRadius, 0, Math.PI * 2, false);
+		darkness.ctx.closePath();
+		darkness.ctx.fillStyle = grd;
+		darkness.ctx.fill();						
+		token.timer += 1;
+		if(token.timer >= token.lightTime){
+			token.lightOn = false;
+			token.timer = 0;
+			repaintDarkness(token.x, token.y, token.lightRadius);
+		}
+	}		
+	//clears old ball
+	function clearBall(x,y){
+		ball.ctx.clearRect(x-5, y-5, ball.size+10, ball.size+10);
+	}
+	//draws new ball
+	function drawCircle(x,y){
+		x = x + ball.radius;
+		y = y + ball.radius;
+		ball.ctx.beginPath();
+		ball.ctx.arc(x,y, ball.radius, 0, Math.PI * 2, false);
+		ball.ctx.closePath();
+		if(settings.color == "undefined"){
+			ball.ctx.fillStyle = "red";
+		}
+		else{
+			ball.ctx.fillStyle = settings.color;
+		}
+		ball.ctx.fill();
+	}
+		
 	//Play mp3 file
 	//function SoundCollision() {
 	//var audio = new Audio('/android_asset/www/punch.ogg');
@@ -511,133 +770,6 @@
         );
       soundfile.play();
 	}
-	//Testbutton in game.html
-	function buttonClicked()
-	{
-	SoundCollision();
-	}
 	
-	
-	function setDarkness(){
-		//Set up the darknessCanvas
-		darknessCanvas = document.getElementById("darkness");
-		darknessContext = darknessCanvas.getContext("2d");
-		darknessCanvas.width = windowWidth;
-		darknessCanvas.height = windowHeight;
-		darknessCanvas.style.top = "0px";
-		darknessCanvas.style.left = "0px";
-		darknessContext.globalAlpha = 1;
-		darknessContext.fillStyle = "rgb(0, 0, 0)";
-		darknessContext.fillRect(((windowWidth/2)-(windowHeight/2)),0, windowHeight, windowHeight);
-		darknessContext.globalCompositeOperation = "destination-out";	
-	}
-	
-	function lightUp(x,y){
-		if(lsMode=="glowing"){
-			setDarkness();
-		}
-		x = x + ballRadius;
-		y = y + ballRadius;
-		var grd = darknessContext.createRadialGradient(x,y,1,x,y,25);
-		
-		/*grd.addColorStop(0, "transparent");
-		grd.addColorStop(0.3, "rgba(255,255,255,.6)"); 
-		grd.addColorStop(0.7, "rgba(255,255,255,.6)"); 
-		grd.addColorStop(1, "transparent"); */
-		grd.addColorStop(0, "rgba(255,255,255, 1)");
-		grd.addColorStop(0.6, "rgba(255,255,255, 1)");
-		grd.addColorStop(1, "transparent");
-		
-		darknessContext.fillStyle = grd;
-		darknessContext.fillRect(0,0,windowWidth,windowHeight);
-	}
-		
-	function tokenLightUp(){
-		//document.getElementById('test').innerHTML = tokenTimer;
-		tokenTimer += 1;
-		x = tokenLightX;
-		y = tokenLightY;
-		var grd = darknessContext.createRadialGradient(x,y,1,x,y,90);
-		
-		grd.addColorStop(0, "rgba(255,255,255, 1)");
-		grd.addColorStop(0.6, "rgba(255,255,255, 1)");
-		grd.addColorStop(1, "transparent");
-		
-		darknessContext.fillStyle = grd;
-		darknessContext.fillRect(0,0,windowWidth,windowHeight);
-		
-		if(tokenTimer >= tokenLightTime){
-			tokenLightOn = false;
-			tokenTimer = 0;
-		}
-	}		
-	
-	function clearBall(x,y){
-		symbolsContext.clearRect(x-5, y-5, ballSize+10, ballSize+10);
-	}
-	
-	function drawCircle(x,y){
-		x = x + ballRadius;
-		y = y + ballRadius;
-		//symbolsContext.clearRect(((windowWidth/2)-(windowHeight/2)),0, windowHeight, windowHeight);
-		symbolsContext.beginPath();
-		symbolsContext.arc(x,y, ballRadius, 0, Math.PI * 2, false);
-		symbolsContext.closePath();
-		if(lsColor == "undefined"){
-			symbolsContext.fillStyle = "red";
-		}
-		else{
-			symbolsContext.fillStyle = lsColor;
-		}
-		symbolsContext.fill();
-	}
-	
-	function ballSetup(size){
-		//BALL DEFINITIONS
-		var bs = document.getElementById('ball');
-		//var size = "12";
-		var startLeft = ((windowWidth/2)-(windowHeight/2)) + 10;
-		var startTop = 10;		
-				
-		//BALL SETUP
-		bs.style.left = startLeft + 'px';
-		bs.style.Top = startTop + 'px';
-		bs.style.width = size + 'px';
-		bs.style.height = size + 'px';
-		bs.style.backgroundColor = lsColor;		
-		
-		//FETCH VALUES
-		ball = $("#ball");		
-		ballSize = ball.height();
-		ballRadius = ballSize/2;		
-		ballPosition = ball.position();
-		ballLeft = ballPosition.left;
-		ballRight = ballPosition.left + ballSize;
-		ballTop = ballPosition.top;
-		ballBottom = ballPosition.top + ballSize;		
-	}
-	
-	function symbolsSetup(){
-		//SETUP SYMBOLS LAYER FOR ICONS (BALL, TOKENS..)
-		symbolsCanvas = document.getElementById("symbols");
-		symbolsContext = symbolsCanvas.getContext("2d");
-		symbolsCanvas.width = windowWidth;
-		symbolsCanvas.height = windowHeight;
-		symbolsCanvas.style.top = "0px";
-		symbolsCanvas.style.left = "0px";	
-	}
-	
-	function skinSetup(){
-	//SKIN DEFINITIONS
-		var skinSetup = document.getElementById('skin');
-		var skinSize = windowHeight;
-		var skinLeft = (windowWidth/2)-(windowHeight/2);
-		
-		//SKIN SETUP
-		skinSetup.style.left = skinLeft + 'px';
-		skinSetup.style.width = skinSize + 'px';
-		skinSetup.style.height = skinSize + 'px';
-		skinSetup.src = 'skins/'+skinName+'.png';
-	}
 	
 

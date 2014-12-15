@@ -1,4 +1,4 @@
-E:\DEV\LabyrintApp\platforms\android\ant-build\HelloWorld-debug-unaligned.apk : \
-E:\DEV\LabyrintApp\platforms\android\ant-build\HelloWorld.ap_ \
-E:\DEV\LabyrintApp\platforms\android\ant-build\classes.dex \
-E:\DEV\LabyrintApp\platforms\android\CordovaLib\ant-build\classes.jar \
+Z:\Documents\GitHub\LabyrintApp\platforms\android\ant-build\HelloWorld-debug-unaligned.apk : \
+Z:\Documents\GitHub\LabyrintApp\platforms\android\ant-build\HelloWorld.ap_ \
+Z:\Documents\GitHub\LabyrintApp\platforms\android\ant-build\classes.dex \
+Z:\Documents\GitHub\LabyrintApp\platforms\android\CordovaLib\ant-build\classes.jar \
