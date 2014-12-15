@@ -27,6 +27,13 @@ public class Controller {
         setPosition(20, 20);
     }
 
+    public void release() {
+        arrowDown.release();
+        arrowLeft.release();
+        arrowRight.release();
+        arrowUp.release();
+    }
+
     public void setPosition(int x, int y) {
         basePos.x = x;
         basePos.y = y;

@@ -52,7 +52,7 @@ public class Graphic {
     }
 
     public void draw(Canvas c) {
-        if(visible) c.drawBitmap(image, null, hitbox, null);
+        if(visible && !image.isRecycled()) c.drawBitmap(image, null, hitbox, null);
     }
 
     public Rect getHitbox()

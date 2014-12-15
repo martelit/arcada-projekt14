@@ -23,7 +23,6 @@ public class Map {
     protected HashSet<Point> collisions = new HashSet<Point>();
     protected HashSet<Rect> tokens = new HashSet<Rect>();
     protected Point start = new Point(0, 0);
-    protected Rect mapBox = new Rect();
     protected int size;
     protected int maxTokens = 0;
     protected int foundTokens = 0;
@@ -76,7 +75,12 @@ public class Map {
         mask.release();
         background.release();
         goal.release();
+        tokenBitmap.recycle();
 
+        collisions.clear();
+        tokens.clear();
+
+        start = new Point(0, 0);
         //More coming...
     }
 

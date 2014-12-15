@@ -77,7 +77,7 @@ public class AudioEngine extends Service {
         music.put("music2", R.raw.qcl0);
 
         HashMap<String, Integer> soundRes = new HashMap<String, Integer>();
-        soundRes.put("move", R.raw.rollin);
+        soundRes.put("move", R.raw.rolling);
         soundRes.put("wall", R.raw.wall);
         soundRes.put("token", R.raw.tokenfound);
         soundRes.put("levelcompleted", R.raw.levelcompleted);
@@ -117,7 +117,9 @@ public class AudioEngine extends Service {
     }
 
     public void onPause() {
+
         if(musicPlayer != null) musicPlayer.pause();
+        stopMove();
     }
 
     public void onPlay() {
@@ -158,12 +160,13 @@ public class AudioEngine extends Service {
     }
 
     private void playNext() {
-        if(!musicIterator.hasNext()) resetIterator();
         Map.Entry<String, Integer> entry = (Map.Entry) musicIterator.next();
         if(Cache.getInstance().getPref().getInt("lastsong", 0) == entry.getValue()) {
             playNext();
             return;
         }
+        if(!musicIterator.hasNext()) resetIterator();
+
         playMusic(entry.getKey());
         musicPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
@@ -193,7 +196,68 @@ public class AudioEngine extends Service {
         playSound(tag, rate);
     }
 
-    public void playMove(int movement) {
+    private ArrayList<Integer> moves = new ArrayList<Integer>();
+    private float lastRate = 1;
+    private boolean movePaused = false;
+
+    public void playMove(int movementX, int movementY) {
+        if(!soundOn) return;
+
+        if(movementX < 0) movementX *= -1;
+        if(movementY < 0) movementY *= -1;
+        int movement = movementX + movementY;
+
+
+        int sum = 0;
+        int amount = 0;
+        int average = 0;
+        int max = 0;
+        int min = 0;
+        for(Integer i : moves) {
+            sum += i;
+            amount++;
+            if(i > max) max = i;
+            if(i < min) min = i;
+        }
+        if(amount != 0) average = sum / amount;
+        Log.v("move", movement + " / " + average);
+
+        if(!movePlaying) {
+            moveId = soundPlayer.play(sounds.get("move"), soundVolume, soundVolume, 1, -1, lastRate);
+            movePlaying = true;
+        }
+
+        if(movement < min) {
+            soundPlayer.pause(moveId);
+            movePaused = true;
+            lastRate = (float)0.5;
+        } else {
+            if(movement > average) {
+                lastRate += 0.1; // (float) 1.2;
+            } else if(movement < average) {
+                lastRate -= 0.1; // (float) 0.5;
+            }
+            if(movePaused) {
+                soundPlayer.resume(moveId);
+                movePaused = false;
+            }
+            if(lastRate > 1.2) lastRate = (float)1.2;
+            if(lastRate < 0.5) lastRate = (float)0.5;
+            soundPlayer.setRate(moveId, lastRate);
+        }
+
+
+        if(moves.size() > 10) moves.remove(1); //limit
+        moves.add(movement);
+    }
+
+    public void stopMove() {
+        soundPlayer.stop(moveId);
+        movePlaying = false;
+        lastRate = (float)0.5;
+    }
+
+    public void playMove1(int movement) {
         if(!soundOn) return;
         if(movement < 0) movement *= -1;
         if(movement < 2) {

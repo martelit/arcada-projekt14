@@ -33,7 +33,6 @@ public class GameActivity extends Activity {
         Log.v(this.getClass().toString(), "pause");
         Cache.getInstance().inFocus = false;
         if (Cache.getInstance().aeBound) {
-
             //Delay the pausing of the music by 0.1s too see if we are just switching GameActivity
             handler.postDelayed(new Runnable() {
                 @Override

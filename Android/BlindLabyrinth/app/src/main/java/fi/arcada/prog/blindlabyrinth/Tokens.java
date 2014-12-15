@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 /**
  * Created by Linus on 12/11/2014.
  */
+//Stub that never got developed, there wasn't enough time
 public class Tokens extends Graphic {
 
     protected int size;

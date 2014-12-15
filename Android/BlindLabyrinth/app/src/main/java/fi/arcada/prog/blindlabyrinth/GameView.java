@@ -1,7 +1,10 @@
 package fi.arcada.prog.blindlabyrinth;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +15,8 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,7 +26,11 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.MotionEvent;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -68,6 +77,11 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
     //Testing to fix bug with landscape as default mode.
     public int rotationIndex;
+
+    protected Thread gameThread;
+    protected Dialog winDialog;
+    protected Point displaySize;
+
 
     public GameView(Context context) {
         super(context);
@@ -176,7 +190,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();
-        Point displaySize = new Point();
+        displaySize = new Point();
         display.getSize(displaySize);
 
         map = new Map(mask, skin, goal, token, displaySize.x, displaySize.y, mode, Color.DKGRAY);
@@ -188,10 +202,13 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_GAME);
 
-        ctrl = new Controller(  BitmapFactory.decodeResource(context.getResources(), R.drawable.up),
-                                BitmapFactory.decodeResource(context.getResources(), R.drawable.right),
-                                BitmapFactory.decodeResource(context.getResources(), R.drawable.down),
-                                BitmapFactory.decodeResource(context.getResources(), R.drawable.left));
+        if(DEBUG_CONTROLS) {
+            ctrl = new Controller(  BitmapFactory.decodeResource(context.getResources(), R.drawable.up),
+                    BitmapFactory.decodeResource(context.getResources(), R.drawable.right),
+                    BitmapFactory.decodeResource(context.getResources(), R.drawable.down),
+                    BitmapFactory.decodeResource(context.getResources(), R.drawable.left));
+        }
+
 
         //Gives 0-3 depending on rotation (0 = 0 grades, 1 = 90, 2 = 180, 3 = 270) and is used in fixing the problem devices running landscape mode by default encountered.
         rotationIndex = display.getRotation();
@@ -204,6 +221,22 @@ public class GameView extends View implements Runnable, SensorEventListener {
         ball = new Ball(map.startX(), map.startY(), map.ballSize(), map.ballSize(), Color.BLUE, this, ballXStartSpeed, ballYStartSpeed);
         setGradientMode();
         createThreads();
+
+        Cache.getInstance().inGame = true;
+    }
+
+    public void endGame() {
+        Cache c = Cache.getInstance();
+
+        c.inGame = false;
+        c.Audio.stopMove();
+    }
+
+    public void release() {
+        map.release();
+        if(DEBUG_CONTROLS) ctrl.release();
+        ballBitmap.recycle();
+
     }
 
     //Sets a few things to right values if trailblazer, glowstick or darkness is chosen as mode.
@@ -228,21 +261,22 @@ public class GameView extends View implements Runnable, SensorEventListener {
 
         //The thread is about this (this class), while .start executes run() in the corresponding class,
         //in this case found just below this method
-        new Thread(this).start();
+        gameThread = new Thread(this);
+        gameThread.start();
     }
 
     //This method loops and refreshes the game screen for as long as needed during a round.
     @Override
     public void run() {
-        while(true) {
+        while(Cache.getInstance().inGame) {
             try {
                 Thread.sleep(30);
+
+                //launches onDraw() below.
+                postInvalidate();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
-            //launches onDraw() below.
-            postInvalidate();
         }
     }
 
@@ -250,6 +284,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
     //In other words code for what happens every counted frame during a game.
     protected void onDraw(Canvas canvas)
     {
+        if(!Cache.getInstance().inGame) return;
         if(gameMode.equals("darkness") && countdownHasNotFinished) {    //Runs during the countdown of darkness mode.
             if(countdownIsNotCreated) {
                 new CountDownTimer(3200, 1000) {
@@ -291,10 +326,11 @@ public class GameView extends View implements Runnable, SensorEventListener {
                 SharedPreferences.Editor editor = prefs.edit();
                 editor.putInt("score", prefs.getInt("score", 0) + (multiplierOne * multiplierTwo));
                 editor.commit();
+
                 Cache.getInstance().Audio.playSound("levelcompleted",(float)2.0);
-                Toast.makeText(App.getContext(), "You've reached the goal, congratz...", Toast.LENGTH_SHORT).show();
-                Activity gvb = (Activity) getContext();
-                gvb.finish();
+
+                GameViewBlank gvb = (GameViewBlank) getContext();
+                gvb.showWin();
 
                 Log.v("END", "The ball is in the goal");
             }
@@ -344,7 +380,7 @@ public class GameView extends View implements Runnable, SensorEventListener {
             }
 
             //Draws the ball.
-            canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
+            if(!ballBitmap.isRecycled()) canvas.drawBitmap(ballBitmap, null, ball.getSize(), ball.getColor());
 
             //Decides what else is drawn depending on the game mode.
             if(gameMode.equals("trailblazer")) {
@@ -403,17 +439,20 @@ public class GameView extends View implements Runnable, SensorEventListener {
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        int x = Math.round(event.getX());
-        int y = Math.round(event.getY());
-        switch(event.getAction())
-        {
-            case MotionEvent.ACTION_DOWN:
-                ctrl.updateDirection(x, y);
-                return true;
-            case MotionEvent.ACTION_UP:
-                ctrl.resetDirection();
-                return true;
+        if(DEBUG_CONTROLS) {
+            int x = Math.round(event.getX());
+            int y = Math.round(event.getY());
+            switch(event.getAction())
+            {
+                case MotionEvent.ACTION_DOWN:
+                    ctrl.updateDirection(x, y);
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    ctrl.resetDirection();
+                    return true;
+            }
         }
+
         return false;
     }
 

@@ -22,6 +22,8 @@ public class Cache {
 
     public boolean inFocus = false; //is our application in focus? [Used by GameActivity]
 
+    public boolean inGame = false;
+
     final static String SETTINGS = "blindLabyrinthPref";
 
     public SharedPreferences getPref() {

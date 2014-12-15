@@ -168,7 +168,8 @@ public class Ball extends GraphicsObject {
         xPosition = xPosition + xSpeed;
         yPosition = yPosition + ySpeed;
 
-        Cache.getInstance().Audio.playMove(xSpeed + ySpeed);
+
+        Cache.getInstance().Audio.playMove(xSpeed, ySpeed);
 
         //Before correct movement can be chosen, a check for collisions should run, since that could affect direction and strength of the speed.
         checkCollisions();
@@ -304,6 +305,7 @@ public class Ball extends GraphicsObject {
                     if(collisionsStarted) {
 
                         Cache.getInstance().Audio.playWall();
+                        Cache.getInstance().Audio.stopMove();
                         collisionsEnded = true;
                     }
                 }
