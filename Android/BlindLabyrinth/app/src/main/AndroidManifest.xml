@@ -8,9 +8,11 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:name="fi.arcada.prog.blindlabyrinth.App">
         <activity
             android:name="fi.arcada.prog.blindlabyrinth.MainActivity"
+            android:screenOrientation="portrait"
             android:label="@string/app_name" >
         </activity>
         <activity
@@ -36,8 +38,17 @@
         </activity>
         <activity
             android:name="fi.arcada.prog.blindlabyrinth.GameViewBlank"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_game_view_blank" >
         </activity>
+        <activity
+            android:name="fi.arcada.prog.blindlabyrinth.Settings"
+            android:screenOrientation="portrait"
+            android:label="@string/title_activity_settings" >
+        </activity>
+
+
+        <service android:name="fi.arcada.prog.blindlabyrinth.AudioEngine" />
     </application>
 
 </manifest>

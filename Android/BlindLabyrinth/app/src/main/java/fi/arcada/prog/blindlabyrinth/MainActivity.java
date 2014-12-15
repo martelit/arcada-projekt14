@@ -1,43 +1,92 @@
 package fi.arcada.prog.blindlabyrinth;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.graphics.Canvas;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.Toast;
+
+import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Handler;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends GameActivity {
+
+    private ServiceConnection aeConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            AudioEngine.AudioBinder binder = (AudioEngine.AudioBinder) service;
+            Cache.getInstance().Audio = binder.getService();
+            Cache.getInstance().aeBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Cache.getInstance().aeBound = false;
+        }
+    };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (Cache.getInstance().aeBound) {
+            unbindService(aeConnection);
+            Cache.getInstance().aeBound = false;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_main);
 
+        //For setting background.
+        View background = findViewById(R.id.background);
+        background.setBackgroundResource(R.drawable.background);
+
+        if (!Cache.getInstance().aeBound) {
+            Intent intent = new Intent(this, AudioEngine.class);
+            bindService(intent, aeConnection, Context.BIND_AUTO_CREATE);
+        }
+
         // Bind controls to needed actions here, button example -LL
-        ((Button) findViewById(R.id.button)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startGame();
-            }
-        });
-        ((Button) findViewById(R.id.btnaccel)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startAccelerometer ();
-            }
-        });
-        ((Button) findViewById(R.id.btnGameViewBlank)).setOnClickListener(new View.OnClickListener() {
+        ((ImageButton) findViewById(R.id.btnGameViewBlank)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startGameViewBlank();
             }
         });
-
+        ((ImageButton) findViewById(R.id.btnSettings)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSettings();
+            }
+        });
     }
 
+
+    public void startGame() {
+        Cache.getInstance().Audio.playSound("move", (float)2.0);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -61,22 +110,17 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    // Method for switching to the GameActivity -LL
-    public void startGame() {
-        Intent i = new Intent(getApplicationContext(), GameActivity.class);
 
-        // Optional parameters might be needed, mode/difficulty etc.
-        // Use the following format to pass needed data:
-        // i.putExtra("key", "value");
-
-        startActivity(i);
-    }
     public void startAccelerometer() {
         Intent intent = new Intent(getApplicationContext(), Accelerometer.class);
         startActivity(intent);
     }
     public void startGameViewBlank() {
         Intent intent = new Intent(getApplicationContext(), GameViewBlank.class);
+        startActivity(intent);
+    }
+    public void startSettings() {
+        Intent intent = new Intent(getApplicationContext(), Settings.class);
         startActivity(intent);
     }
 }
