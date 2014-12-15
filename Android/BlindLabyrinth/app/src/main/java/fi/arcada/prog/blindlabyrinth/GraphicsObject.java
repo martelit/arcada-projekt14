@@ -169,6 +169,12 @@ public class GraphicsObject {
         return new Point(xPosition, yPosition);
     }
 
+    //For use when HA is on.
+    public void setGradientShader() {
+        gPaint.setShader(new RadialGradient(xPosition+midPointLength, yPosition+midPointLength, gradientFadeLength, Color.TRANSPARENT, gPaintFade.getColor(), Shader.TileMode.CLAMP));
+    }
+
+    //For use when HA is off (all 3 below)
     //The following 3 methods are used to update the gradient paint once per frame, depending on which game mode is chosen of course.
     public void setGradientShaderGlowstick(ArrayList<Point> pointsForShaders) {
 

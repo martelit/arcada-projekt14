@@ -78,7 +78,7 @@ public class Ball extends GraphicsObject {
 
     //Method for moving the ball once with the current speed compared to where it was positioned before the call,
     //in other words updates its position for the next drawing.
-    public void move(float acceleratorX, float acceleratorY, Map map)
+    public void move(float acceleratorX, float acceleratorY, Map map, boolean HA)
     {
         //Code for using an acceleration formula to decide the ball's movement.
         //Works, but is used for meters and seconds in real life, so adjustment of values is needed to get movement that makes sense.
@@ -190,6 +190,11 @@ public class Ball extends GraphicsObject {
 
         //The position of the ball is set here, based on what has happened to xPosition and yPosition before.
         updateRect();
+
+        //Same for glow if it's on.
+        if(HA) {
+            setGradientShader();
+        }
     }
 
     //Method to use in conjunction with the acceleration formula to get values for the ball's movement.
